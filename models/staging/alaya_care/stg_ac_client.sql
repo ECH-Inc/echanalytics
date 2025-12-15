@@ -3,7 +3,7 @@ WITH raw_client AS (
     FROM {{ source('alaya_care', 'client') }}
 ),
 flatten_client AS(
-    SELECT client_id,
+    SELECT client_id AS ac_client_id,
         profile_id,
         guid,
         branch_id,
@@ -11,10 +11,10 @@ flatten_client AS(
         profile:mac_id::VARCHAR AS mac_id,
         profile:hcp_recipient_id::VARCHAR AS hcp_recipient_id,
         profile:import_id::VARCHAR AS import_id,
-        profile:uid::VARCHAR AS uid,
+        profile:uid::VARCHAR AS crm_id,
         profile:salutation::VARCHAR AS salutation,
         profile:first_name::VARCHAR AS first_name,
-        profile:middlename::VARCHAR AS middlename,
+        profile:middlename::VARCHAR AS middle_name,
         profile:last_name::VARCHAR AS last_name,
         profile:preferred_name::VARCHAR AS preferred_name,
         birthday,
@@ -113,6 +113,7 @@ flatten_client AS(
         visit_count,
         has_adls,
     FROM raw_client
+    WHERE _etl_is_deleted = FALSE
 )
 SELECT *
 FROM flatten_client
