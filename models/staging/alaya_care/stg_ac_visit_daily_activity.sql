@@ -47,7 +47,7 @@ filtered_soft_delete AS(
         adl_module_id,
         adl_properties:available_from::VARCHAR AS available_from,
         adl_properties:available_to::VARCHAR AS available_to,
-        adl_properties:client_id::VARCHAR AS client_id,
+        adl_properties:client_id::VARCHAR AS ac_client_id,
         adl_module_name,
         adl_latest_revision,
         adl_monthday,

@@ -16,7 +16,7 @@ filtered_soft_delete AS(
         service_instructions,
         service_contact_id,
         profile_id,
-        service_client_id,
+        service_client_id AS ac_client_id,
         service_code_id,
         service_status_date,
         service_status_end_date,
