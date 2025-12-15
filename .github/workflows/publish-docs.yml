@@ -1,0 +1,48 @@
+name: Publish dbt Docs
+
+on:
+  push:
+    branches:
+      - main # Triggers on pushes to the main branch
+
+jobs:
+  build-and-deploy-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12' # Use your required Python version
+
+    - name: Install dbt and dependencies
+      run: |
+        python -m pip install --upgrade pip
+        # Replace dbt-snowflake with your specific dbt adapter (e.g., dbt-postgres, dbt-bigquery)
+        pip install dbt-core dbt-snowflake
+        dbt deps
+
+    # This step creates a minimal profiles.yml to satisfy the 'dbt docs generate' command's requirement
+    - name: Set up dbt profiles
+      run: |
+        mkdir -p ~/.dbt
+        echo "docs:
+          target: ci
+          outputs:
+            ci:
+              type: duckdb
+              path: /tmp/dbt.duckdb" > ~/.dbt/profiles.yml
+
+    - name: Generate dbt docs
+      run: dbt docs generate --static
+
+    # This popular third-party action pushes the generated files to the gh-pages branch
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GH_PAT }}
+        publish_dir: ./target # The directory where dbt docs generate outputs files
+        publish_branch: gh-pages
