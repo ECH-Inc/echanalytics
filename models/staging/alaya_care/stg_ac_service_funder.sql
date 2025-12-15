@@ -2,7 +2,7 @@ WITH raw_service_funder AS (
     SELECT *
     FROM {{ source('alaya_care', 'service_funder') }}
 ),
-order_cols AS (
+filtered_soft_delete AS (
     SELECT service_id,
         service_guid,
         service_funder_id,
@@ -16,6 +16,7 @@ order_cols AS (
         _etl_is_deleted,
         _etl_updated_at_utc
     FROM raw_service_funder
+    WHERE _etl_is_deleted = FALSE
 )
 SELECT *
-FROM order_cols
+FROM filtered_soft_delete
