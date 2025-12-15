@@ -16,7 +16,7 @@ stg_service_funder AS (
 ),
 fix_service_date AS(
     SELECT service_id,
-        service_client_id AS ac_client_id,
+        ac_client_id,
         service_description,
         IFNULL(service_start_date, '1970-01-01') AS service_start_date,
         CASE WHEN service_status = 'on_hold' THEN IFNULL(service_projected_end_date, '9999-12-31')

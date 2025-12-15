@@ -22,7 +22,7 @@ keep_required_columns AS(
         idaccounttype,
         account_type,
         employee_id,
-        client_id,
+        client_id AS ac_client_id,
         service_instructions,
         visit_unit_qty,
         hours_bill,
