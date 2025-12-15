@@ -1,8 +1,8 @@
 sources:
 - name: alaya_care
   description: Alaya Care shared database
-  database: "{{ env_var('AC_DB') }}"
-  schema: "{{ env_var('AC_SCHEMA') }}"
+  database: PROD_ALAYACARESHARE
+  schema: 1D211AD7-BDC7-49D3-B4F0-725CD96273D0
   quoting:
     schema: true
   tables:
