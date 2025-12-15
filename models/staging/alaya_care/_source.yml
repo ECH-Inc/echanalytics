@@ -1,0 +1,35 @@
+sources:
+- name: alaya_care
+  description: Alaya Care shared database
+  database: "{{ env_var('AC_DB') }}"
+  schema: "{{ env_var('AC_SCHEMA') }}"
+  quoting:
+    schema: true
+  tables:
+    - name: client
+      identifier: SHARED_CLIENT_INCREMENTAL
+      description: Client profile data from Alaya Care
+    - name: funder
+      identifier: SHARED_FUNDER
+      description: funder data from Alaya Care
+    - name: funding_block
+      identifier: SHARED_FUNDING_BLOCK
+    - name: service
+      identifier: SHARED_SERVICE_INCREMENTAL
+      description: Client service data from Alaya Care
+    - name: service_funder
+      identifier: SHARED_SERVICE_FUNDER_INCREMENTAL
+    - name: facility
+      identifier: SHARED_FACILITY
+      description: Service facility from Alaya Care
+    - name: service_code
+      identifier: SHARED_SERVICE_CODE
+    - name: visit
+      identifier: SHARED_VISIT_INCREMENTAL
+      description: Client visit data from Alaya Care
+    - name: visit_note
+      identifier: SHARED_VISIT_NOTE_INCREMENTAL
+      description: The note for each client visit data from Alaya Care
+    - name: visit_tag
+      identifier: SHARED_VISIT_TAG_INCREMENTAL
+      description: The tag for each client visit data from Alaya Care

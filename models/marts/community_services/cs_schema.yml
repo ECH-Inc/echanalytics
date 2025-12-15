@@ -1,0 +1,9 @@
+models:
+  - name: dim_client_ac
+    description: Client basic demographic profile data from Alaya Care
+    columns:
+      - name: client_id
+        description: Unique identifier for each customer in Alaya Care
+        tests:
+          - unique
+          - not_null

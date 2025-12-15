@@ -1,0 +1,19 @@
+
+target/
+dbt_packages/
+logs/
+dbt_internal_packages/
+.vscode
+# Ignore sensitive information (e.g., environment variables)
+.env
+config.local.js
+
+# Ignore IDE-specific files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Ignore compiled files (e.g., Python)
+__pycache__/
+*.pyc
