@@ -46,11 +46,15 @@ past_visit AS(
     FROM stg_visit
     WHERE start_at < current_date()
 ),
+dim_client AS(
+    SELECT *
+    FROM {{ ref('dim_client_ac') }}
+),
 dim_service AS(
     SELECT *
     FROM {{ ref('dim_service_ac') }}
 ),
-get_service_details AS(
+get_service_client_details AS(
     SELECT past_visit.visit_id,
         past_visit.guid,
         past_visit.start_at,
@@ -69,6 +73,9 @@ get_service_details AS(
         past_visit.account_type,
         past_visit.employee_id,
         past_visit.ac_client_id,
+
+        dim_client.crm_id,
+
         past_visit.service_instructions,
         past_visit.visit_unit_qty,
         past_visit.visit_hours_bill,
@@ -95,8 +102,10 @@ get_service_details AS(
         dim_service.department_id,
         dim_service.funder_program
     FROM past_visit
+    INNER JOIN dim_client
+        ON past_visit.ac_client_id = dim_client.ac_client_id
     LEFT JOIN dim_service
         ON past_visit.service_id = dim_service.service_id
 )
 SELECT *
-FROM get_service_details
+FROM get_service_client_details
