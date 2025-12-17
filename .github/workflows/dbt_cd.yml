@@ -9,15 +9,19 @@ permissions:
   id-token: write
 
 jobs:
-  deploy:
+  deploy-slim:
     runs-on: ubuntu-latest
+    environment: production
     env:
-          SNOWFLAKE_ACCOUNT: ${{ secrets.PROD_SNOWFLAKE_ACCOUNT }}
-          SNOWFLAKE_USER: ${{ secrets.PROD_SNOWFLAKE_USER }}
-          SNOWFLAKE_ROLE: ${{ secrets.PROD_SNOWFLAKE_ROLE }}
-          SNOWFLAKE_DB: ${{ secrets.PROD_SNOWFLAKE_DB }}
-          SNOWFLAKE_SCHEMA: ${{ secrets.PROD_SNOWFLAKE_SCHEMA }}
-          SNOWFLAKE_WH: ${{ secrets.PROD_SNOWFLAKE_WH }}
+        SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+        SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+        SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
+        SNOWFLAKE_DB: ${{ secrets.SNOWFLAKE_DB }}
+        SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
+        SNOWFLAKE_WH: ${{ secrets.SNOWFLAKE_WH }}
+        SNOWFLAKE_CLIENT_ID: ${{ secrets.SNOWFLAKE_CLIENT_ID }}
+        SNOWFLAKE_CLIENT_SECRET: ${{ secrets.SNOWFLAKE_CLIENT_SECRET }}
+        SNOWFLAKE_REFRESH_TOKEN: ${{ secrets.SNOWFLAKE_REFRESH_TOKEN }}
 
     steps:
       - name: Checkout Code
@@ -25,15 +29,19 @@ jobs:
 
       - name: Setup python & dbt
         uses: actions/setup-python@v5
-        with: { python-version: '3.12' }
+        with: 
+          python-version: '3.12'
         
-      - name: Install dbt
-        run: pip install dbt-core dbt-snowflake
+      - name: Install dbt Adapter
+        run: pip install dbt-snowflake
+
+      - name: Install dbt packages
+        run: dbt deps
 
       # CD: Deploy directly to Production
       - name: Download Previous Manifest
         # Fetches manifest from the last successful CD run for state comparison
-        uses: dawidd6/action-download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           branch: main
           name: dbt-manifest
@@ -52,9 +60,9 @@ jobs:
       # Docs: Generate and Deploy to GitHub Pages
       - name: Generate Docs
         run: |
-          dbt docs generate --target prod
+          dbt docs generate --target prod --static
           mkdir -p public
-          cp target/index.html target/manifest.json target/catalog.json public/
+          cp target/static_index.html public/index.html
       
       - name: Upload Manifest for Next CD Run
         # This keeps your state persistent for the next 'state:modified' run

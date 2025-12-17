@@ -2,29 +2,48 @@ name: dbt Snowflake CI
 on:
   pull_request:
     branches:
-      - [main, dev]
+      - main
+      - dev
 
 jobs:
-  test:
+  dbt-ci:
     runs-on: ubuntu-latest
+    environment: ${{ github.base_ref == 'main' && 'production' || 'development' }}
     env:
-          SNOWFLAKE_ACCOUNT: ${{ secrets.DEV_SNOWFLAKE_ACCOUNT }}
-          SNOWFLAKE_USER: ${{ secrets.DEV_SNOWFLAKE_USER }}
-          SNOWFLAKE_ROLE: ${{ secrets.DEV_SNOWFLAKE_ROLE }}
-          SNOWFLAKE_DB: ${{ secrets.DEV_SNOWFLAKE_DB }}
-          SNOWFLAKE_SCHEMA: ${{ secrets.DEV_SNOWFLAKE_SCHEMA }}
-          SNOWFLAKE_WH: ${{ secrets.DEV_SNOWFLAKE_WH }}
+        SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+        SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+        SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
+        SNOWFLAKE_DB: ${{ secrets.SNOWFLAKE_DB }}
+        SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
+        SNOWFLAKE_WH: ${{ secrets.SNOWFLAKE_WH }}
+        SNOWFLAKE_CLIENT_ID: ${{ secrets.SNOWFLAKE_CLIENT_ID }}
+        SNOWFLAKE_CLIENT_SECRET: ${{ secrets.SNOWFLAKE_CLIENT_SECRET }}
+        SNOWFLAKE_REFRESH_TOKEN: ${{ secrets.SNOWFLAKE_REFRESH_TOKEN }}
+        DBT_SCHEMA: "CI_${{ github.event.pull_request.number }}"
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install dependencies
-        run: pip install dbt-snowflake
+
+      - name: Install dbt Adapter
+        run: |
+          python -m pip install --upgrade pip
+          pip install dbt-snowflake
+
+      - name: Install dbt packages
+        run: dbt deps
+
+      - name: Run dbt debug (Verify Connection)
+        run: dbt debug
+
       - name: Run dbt compile
         run: dbt compile --profiles-dir .
+
       - name: Run dbt tests in dev
         run: |
-          dbt run --target dev
-          dbt test --target dev
+          # Only run models modified in this PR (Slim CI)
+          dbt build --select state:modified+

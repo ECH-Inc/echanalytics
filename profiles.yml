@@ -3,7 +3,10 @@ echanalytics:
   outputs:
     dev:
       type: snowflake
-      authenticator: externalbrowser
+      authenticator: oauth
+      oauth_client_id: "{{ env_var('DBT_OAUTH_CLIENT_ID') }}"
+      oauth_client_secret: "{{ env_var('DBT_OAUTH_CLIENT_SECRET') }}"
+      token: "{{ env_var('DBT_OAUTH_REFRESH_TOKEN') }}"
       account: "{{ env_var('DBT_DEV_SNOWFLAKE_ACCOUNT') }}"
       role: "{{ env_var('DBT_DEV_SNOWFLAKE_ROLE') }}"
       user: "{{ env_var('DBT_DEV_SNOWFLAKE_USER') }}"
@@ -14,7 +17,10 @@ echanalytics:
 
     prod:
       type: snowflake
-      authenticator: externalbrowser
+      authenticator: oauth
+      oauth_client_id: "{{ env_var('DBT_OAUTH_CLIENT_ID') }}"
+      oauth_client_secret: "{{ env_var('DBT_OAUTH_CLIENT_SECRET') }}"
+      token: "{{ env_var('DBT_OAUTH_REFRESH_TOKEN') }}"
       account: "{{ env_var('DBT_PROD_SNOWFLAKE_ACCOUNT') }}"
       role: "{{ env_var('DBT_PROD_SNOWFLAKE_ROLE') }}"
       user: "{{ env_var('DBT_PROD_SNOWFLAKE_USER') }}"
