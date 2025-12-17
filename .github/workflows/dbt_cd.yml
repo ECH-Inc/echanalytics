@@ -50,6 +50,7 @@ jobs:
           name: dbt-manifest
           path: ./state
           if_no_artifact_found: warn
+        continue-on-error: true
 
       - name: dbt Build (Production)
         # run: dbt build --target prod
@@ -73,7 +74,7 @@ jobs:
           dbt docs generate --target prod --static
           mkdir -p public
           cp target/static_index.html public/index.html
-          
+
       - name: Upload Docs Artifact to GitHub Pages
         uses: actions/upload-pages-artifact@v3
         with:

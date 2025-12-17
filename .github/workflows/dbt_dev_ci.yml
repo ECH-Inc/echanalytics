@@ -55,6 +55,7 @@ jobs:
           name: dbt-manifest
           path: ./state
           if_no_artifact_found: warn
+        continue-on-error: true
 
       - name: dbt Build (Development)
         # run: dbt build --target prod
