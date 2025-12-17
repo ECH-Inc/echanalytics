@@ -1,0 +1,72 @@
+name: dbt Snowflake CD & Docs
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.PROD_SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_USER: ${{ secrets.PROD_SNOWFLAKE_USER }}
+          SNOWFLAKE_ROLE: ${{ secrets.PROD_SNOWFLAKE_ROLE }}
+          SNOWFLAKE_DB: ${{ secrets.PROD_SNOWFLAKE_DB }}
+          SNOWFLAKE_SCHEMA: ${{ secrets.PROD_SNOWFLAKE_SCHEMA }}
+          SNOWFLAKE_WH: ${{ secrets.PROD_SNOWFLAKE_WH }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup python & dbt
+        uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+        
+      - name: Install dbt
+        run: pip install dbt-core dbt-snowflake
+
+      # CD: Deploy directly to Production
+      - name: Download Previous Manifest
+        # Fetches manifest from the last successful CD run for state comparison
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          branch: main
+          name: dbt-manifest
+          path: ./state
+          if_no_artifact_found: warn
+
+      - name: dbt Build (Production)
+        # run: dbt build --target prod
+        run: |
+          if [ -f "./state/manifest.json" ]; then
+            dbt build --target prod --select state:modified+ --state ./state
+          else
+            dbt build --target prod # Fallback to full build if no manifest exists
+          fi
+        
+      # Docs: Generate and Deploy to GitHub Pages
+      - name: Generate Docs
+        run: |
+          dbt docs generate --target prod
+          mkdir -p public
+          cp target/index.html target/manifest.json target/catalog.json public/
+      
+      - name: Upload Manifest for Next CD Run
+        # This keeps your state persistent for the next 'state:modified' run
+        uses: actions/upload-artifact@v4
+        with:
+          name: dbt-manifest
+          path: target/manifest.json
+
+      - name: Upload Docs Artifact to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./public
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4

@@ -2,7 +2,7 @@ WITH raw_service AS (
     SELECT *
     FROM {{ source('alaya_care', 'service') }}
 ),
-keep_required_columns AS(
+filtered_soft_delete AS(
     SELECT service_id,
         guid,
         branch_id,
@@ -16,7 +16,7 @@ keep_required_columns AS(
         service_instructions,
         service_contact_id,
         profile_id,
-        service_client_id,
+        service_client_id AS ac_client_id,
         service_code_id,
         service_status_date,
         service_status_end_date,
@@ -46,6 +46,8 @@ keep_required_columns AS(
         _etl_updated_at_utc,
         _etl_is_deleted
     FROM raw_service
+    WHERE service_status_reason <> 'Entered in Error'
+        AND _etl_is_deleted = FALSE
 )
 SELECT *
-FROM keep_required_columns
+FROM filtered_soft_delete

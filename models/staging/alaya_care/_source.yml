@@ -9,6 +9,18 @@ sources:
     - name: client
       identifier: SHARED_CLIENT_INCREMENTAL
       description: Client profile data from Alaya Care
+    - name: client_tag
+      identifier: SHARED_CLIENT_TAGS
+    - name: client_care_plan
+      identifier: SHARED_CLIENT_CARE_PLAN
+    - name: client_contact
+      identifier: SHARED_CLIENT_CONTACT
+    - name: client_rates
+      identifier: SHARED_CLIENT_RATES
+    - name: client_risk
+      identifier: SHARED_CLIENT_RISK
+    - name: client_progress_notes
+      identifier: SHARED_CLIENT_PROGRESS_NOTES
     - name: funder
       identifier: SHARED_FUNDER
       description: funder data from Alaya Care
@@ -33,3 +45,9 @@ sources:
     - name: visit_tag
       identifier: SHARED_VISIT_TAG_INCREMENTAL
       description: The tag for each client visit data from Alaya Care
+    - name: visit_recurrence_detail
+      identifier: SHARED_VISIT_RECURRENCE_DETAIL_INCREMENTAL
+    - name: visit_daily_activity
+      identifier: SHARED_VISIT_DAILY_ACTIVITY_INCREMENTAL
+    - name: visit_rating_funder
+      identifier: SHARED_VISIT_RATING_FUNDER_INCREMENTAL
