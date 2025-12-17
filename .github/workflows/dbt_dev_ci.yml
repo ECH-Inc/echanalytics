@@ -4,6 +4,7 @@ on:
   pull_request:
     branches: [dev]
     types: [opened, synchronize, reopened]
+  workflow_dispatch: # Allow manual trigger if required
   
   # Trigger when code is merged or pushed directly to dev branch
   push:
