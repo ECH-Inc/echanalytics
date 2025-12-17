@@ -3,6 +3,7 @@ on:
   # Trigger when code is merged or pushed directly to main branch
   push:
     branches: [main]
+  workflow_dispatch: # Allow manual trigger if required
 
 permissions:
   contents: read
