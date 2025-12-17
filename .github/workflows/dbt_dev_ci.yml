@@ -1,18 +1,18 @@
-name: dbt Snowflake CD & Docs
+name: dbt Snowflake Dev CI
 on:
-  # Trigger when code is merged or pushed directly to main branch
+  # Trigger when a PR is created or updated the target dev branch
+  pull_request:
+    branches: [dev]
+    types: [opened, synchronize, reopened]
+  
+  # Trigger when code is merged or pushed directly to dev branch
   push:
-    branches: [main]
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+    branches: [dev]
 
 jobs:
-  dbt-deploy-slim:
+  dbt-dev-ci:
     runs-on: ubuntu-latest
-    environment: production
+    environment: development
     env:
         SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
         SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
@@ -28,11 +28,11 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: Set up Python
         uses: actions/setup-python@v5
-        with: 
+        with:
           python-version: '3.12'
-        
+
       - name: Install dbt Adapter
         run: |
           python -m pip install --upgrade pip
@@ -41,44 +41,34 @@ jobs:
       - name: Install dbt packages
         run: dbt deps
 
-      # CD: Deploy directly to Production
+      - name: Run dbt debug (Verify Connection)
+        run: dbt debug
+
+      - name: Run dbt compile
+        run: dbt compile --profiles-dir .
+
       - name: Download Previous Manifest
-        # Fetches manifest from the last successful CD run for state comparison
+        # Fetches manifest from the last successful CI run for state comparison
         uses: actions/download-artifact@v4
         with:
-          branch: main
+          branch: dev
           name: dbt-manifest
           path: ./state
           if_no_artifact_found: warn
         continue-on-error: true
 
-      - name: dbt Build (Production)
+      - name: dbt Build (Development)
         # run: dbt build --target prod
         run: |
           if [ -f "./state/manifest.json" ]; then
-            dbt build --target prod --select state:modified+ --state ./state
+            dbt build --target dev --select state:modified+ --state ./state
           else
-            dbt build --target prod # Fallback to full build if no manifest exists
+            dbt build --target dev # Fallback to full build if no manifest exists
           fi
-
-      - name: Upload Manifest for Next CD Run
+      
+      - name: Upload Manifest for Next Dev CI Run
         # This keeps your state persistent for the next 'state:modified' run
         uses: actions/upload-artifact@v4
         with:
           name: dbt-manifest
           path: target/manifest.json
-        
-      # Docs: Generate and Deploy to GitHub Pages
-      - name: Generate Docs
-        run: |
-          dbt docs generate --target prod --static
-          mkdir -p public
-          cp target/static_index.html public/index.html
-
-      - name: Upload Docs Artifact to GitHub Pages
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./public
-
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v4
