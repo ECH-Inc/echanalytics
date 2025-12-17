@@ -47,5 +47,27 @@ jobs:
       - name: Run dbt compile
         run: dbt compile --profiles-dir .
 
-      - name: Run dbt tests in dev
-        run: dbt build --target dev
+      - name: Download Previous Manifest
+        # Fetches manifest from the last successful CI run for state comparison
+        uses: actions/download-artifact@v4
+        with:
+          branch: dev
+          name: dbt-manifest
+          path: ./state
+          if_no_artifact_found: warn
+
+      - name: dbt Build (Development)
+        # run: dbt build --target prod
+        run: |
+          if [ -f "./state/manifest.json" ]; then
+            dbt build --target dev --select state:modified+ --state ./state
+          else
+            dbt build --target dev # Fallback to full build if no manifest exists
+          fi
+      
+      - name: Upload Manifest for Next Dev CI Run
+        # This keeps your state persistent for the next 'state:modified' run
+        uses: actions/upload-artifact@v4
+        with:
+          name: dbt-manifest
+          path: target/manifest.json
