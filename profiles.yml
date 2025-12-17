@@ -4,27 +4,27 @@ echanalytics:
     dev:
       type: snowflake
       authenticator: oauth
-      oauth_client_id: "{{ env_var('DBT_OAUTH_CLIENT_ID') }}"
-      oauth_client_secret: "{{ env_var('DBT_OAUTH_CLIENT_SECRET') }}"
-      token: "{{ env_var('DBT_OAUTH_REFRESH_TOKEN') }}"
-      account: "{{ env_var('DBT_DEV_SNOWFLAKE_ACCOUNT') }}"
-      role: "{{ env_var('DBT_DEV_SNOWFLAKE_ROLE') }}"
-      user: "{{ env_var('DBT_DEV_SNOWFLAKE_USER') }}"
-      database: "{{ env_var('DBT_DEV_SNOWFLAKE_DB') }}"
-      schema: "{{ env_var('DBT_DEV_SNOWFLAKE_SCHEMA') }}"
-      warehouse: "{{ env_var('DBT_DEV_SNOWFLAKE_WH') }}"
+      oauth_client_id: "{{ env_var('SNOWFLAKE_CLIENT_ID') }}"
+      oauth_client_secret: "{{ env_var('SNOWFLAKE_CLIENT_SECRET') }}"
+      token: "{{ env_var('SNOWFLAKE_REFRESH_TOKEN') }}"
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+      role: "{{ env_var('SNOWFLAKE_ROLE') }}"
+      user: "{{ env_var('SNOWFLAKE_USER') }}"
+      database: "{{ env_var('SNOWFLAKE_DB') }}"
+      schema: "{{ env_var('SNOWFLAKE_SCHEMA') }}"
+      warehouse: "{{ env_var('SNOWFLAKE_WH') }}"
       threads: 1
 
     prod:
       type: snowflake
       authenticator: oauth
-      oauth_client_id: "{{ env_var('DBT_OAUTH_CLIENT_ID') }}"
-      oauth_client_secret: "{{ env_var('DBT_OAUTH_CLIENT_SECRET') }}"
-      token: "{{ env_var('DBT_OAUTH_REFRESH_TOKEN') }}"
-      account: "{{ env_var('DBT_PROD_SNOWFLAKE_ACCOUNT') }}"
-      role: "{{ env_var('DBT_PROD_SNOWFLAKE_ROLE') }}"
-      user: "{{ env_var('DBT_PROD_SNOWFLAKE_USER') }}"
-      database: "{{ env_var('DBT_PROD_SNOWFLAKE_DB') }}"
-      schema: "{{ env_var('DBT_PROD_SNOWFLAKE_SCHEMA') }}"
-      warehouse: "{{ env_var('DBT_PROD_SNOWFLAKE_WH') }}"
+      oauth_client_id: "{{ env_var('SNOWFLAKE_CLIENT_ID') }}"
+      oauth_client_secret: "{{ env_var('SNOWFLAKE_CLIENT_SECRET') }}"
+      token: "{{ env_var('SNOWFLAKE_REFRESH_TOKEN') }}"
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+      role: "{{ env_var('SNOWFLAKE_ROLE') }}"
+      user: "{{ env_var('SNOWFLAKE_USER') }}"
+      database: "{{ env_var('SNOWFLAKE_DB') }}"
+      schema: "{{ env_var('SNOWFLAKE_SCHEMA') }}"
+      warehouse: "{{ env_var('SNOWFLAKE_WH') }}"
       threads: 1
