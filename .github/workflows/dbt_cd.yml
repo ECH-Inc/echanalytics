@@ -2,7 +2,7 @@ name: dbt Snowflake CD & Docs
 on:
   # Trigger when code is merged or pushed directly to main branch
   push:
-    branches: [main]
+    branches: [master]
   workflow_dispatch: # Allow manual trigger if required
 
 permissions:

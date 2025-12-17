@@ -1,12 +1,12 @@
-name: dbt Snowflake Main CI
+name: dbt Snowflake Master CI
 on:
-  # Trigger when a PR is created or updated the target main branch
+  # Trigger when a PR is created or updated the target master branch
   pull_request:
-    branches: [main]
+    branches: [master]
     types: [opened, synchronize, reopened]
 
 jobs:
-  dbt-main-ci:
+  dbt-master-ci:
     runs-on: ubuntu-latest
     environment: production
     env:
@@ -62,3 +62,8 @@ jobs:
       # TEST: Run on Pull Requests (Slim CI)
       - name: Run dbt Build
         run: dbt build # Fallback to full build if no manifest exists
+
+      - name: Cleanup CI Schema
+        if: always() && github.event_name == 'pull_request'
+        run: |
+          dbt run-operation drop_schema_operation --args "{schema_name: $DBT_SCHEMA" --target ci_cd
