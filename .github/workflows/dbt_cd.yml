@@ -6,6 +6,7 @@ on:
   workflow_dispatch: # Allow manual trigger if required
 
 permissions:
+  actions: read
   contents: read
   pages: write
   id-token: write
@@ -46,19 +47,24 @@ jobs:
       - name: Download Previous Manifest
         # Fetches manifest from the last successful CD run for state comparison
         uses: actions/download-artifact@v4
-        with:
-          branch: main
-          name: dbt-manifest
-          path: ./state
-          if_no_artifact_found: warn
         continue-on-error: true
+        with:
+          name: dbt-manifest
+          run-id: ${{ github.event.workflow_run.id }}
+          path: ./state
+          github-token: ${{ github.token }}
+        
+      - name: Display structure of downloaded files
+        run: ls -lah ./state || true
 
       - name: dbt Build (Production)
         # run: dbt build --target prod
         run: |
           if [ -f "./state/manifest.json" ]; then
+            echo "Found previous manifest -> using state to build modified models"
             dbt build --target prod --select state:modified+ --state ./state
           else
+            echo "No previous manifest -> building all"
             dbt build --target prod # Fallback to full build if no manifest exists
           fi
 
