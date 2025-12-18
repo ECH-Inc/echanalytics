@@ -11,18 +11,17 @@ jobs:
     permissions:
       actions: read
       contents: read
-    environment: production
+    environment: development
     env:
         SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
         SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
         SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
         SNOWFLAKE_DB: ${{ secrets.SNOWFLAKE_DB }}
-        SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
         SNOWFLAKE_WH: ${{ secrets.SNOWFLAKE_WH }}
         SNOWFLAKE_CLIENT_ID: ${{ secrets.SNOWFLAKE_CLIENT_ID }}
         SNOWFLAKE_CLIENT_SECRET: ${{ secrets.SNOWFLAKE_CLIENT_SECRET }}
         SNOWFLAKE_REFRESH_TOKEN: ${{ secrets.SNOWFLAKE_REFRESH_TOKEN }}
-        DBT_SCHEMA: "CI_${{ github.event.pull_request.number || 'PROD' }}"
+        DBT_SCHEMA: "CI_${{ github.event.pull_request.number || 'MASTER_CI' }}"
 
     steps:
       - name: Checkout Code
@@ -108,6 +107,6 @@ jobs:
           fi
 
       - name: Cleanup CI Schema
-        if: always() && github.event_name == 'pull_request'
+        if: ${{ always() && github.event_name == 'pull_request' }}
         run: |
-          dbt run-operation drop_schema_operation --args "{schema_name: $DBT_SCHEMA" --target ci_cd
+          dbt run-operation drop_schema_operation --args '{"schema_name": "'"${DBT_SCHEMA}"'"}' --target ci_cd
