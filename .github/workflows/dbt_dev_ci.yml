@@ -13,6 +13,9 @@ on:
 jobs:
   dbt-dev-ci:
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
     environment: development
     env:
         SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
@@ -53,6 +56,9 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: dbt-manifest
+          run-id: ${{ github.event.workflow_run.id }}
+          path: ./state
+          github-token: ${{ github.token }}
 
       - name: Display structure of downloaded files
         run: ls -R
@@ -61,8 +67,8 @@ jobs:
       - name: dbt Build (Development)
         # run: dbt build --target prod
         run: |
-          if [ -f " manifest.json" ]; then
-            dbt build --target dev --select state:modified+ --state .
+          if [ -f " ./state/manifest.json" ]; then
+            dbt build --target dev --select state:modified+ --state ./state
           else
             dbt build --target dev # Fallback to full build if no manifest exists
           fi
