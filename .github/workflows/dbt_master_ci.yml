@@ -66,7 +66,7 @@ jobs:
       - name: Build dbt Profiles
         run: |
           mkdir -p ~/.dbt
-          echo "default:
+          echo "echanalytics:
             outputs:
               ci_cd:
                 type: snowflake
@@ -82,6 +82,16 @@ jobs:
                 schema: $DBT_SCHEMA
                 threads: 1
             target: ci_cd" > ~/.dbt/profiles.yml
+          
+          # Point dbt at this temporary profile directory for subsequent steps
+          echo "DBT_PROFILES_DIR=$PWD/.ci/profiles" >> $GITHUB_ENV
+
+      
+      - name: dbt debug (with temp profile)
+        run: dbt debug --profiles-dir "$DBT_PROFILES_DIR"
+
+      - name: dbt compile (with temp profile)
+        run: dbt compile --profiles-dir "$DBT_PROFILES_DIR"
 
       - name: Download Previous Manifest
         # Fetches manifest from the last successful CI run for state comparison
@@ -101,13 +111,15 @@ jobs:
         run: |
           if [ -f "./state/manifest.json" ]; then
             echo "Found previous manifest -> using state to build modified models"
-            dbt build --select state:modified --state ./state
+            dbt build --profiles-dir "$DBT_PROFILES_DIR" --select state:modified --state ./state
           else
             echo "No previous manifest -> building all"
-            dbt build # Fallback to full build if no manifest exists
+            dbt build --profiles-dir "$DBT_PROFILES_DIR" # Fallback to full build if no manifest exists
           fi
 
       - name: Cleanup CI Schema
         if: ${{ always() && github.event_name == 'pull_request' }}
         run: |
-          dbt run-operation drop_schema_operation --args '{"schema_name": "'"${DBT_SCHEMA}"'"}' --target ci_cd
+          dbt run-operation drop_schema_operation \
+            --args '{"schema_name": "'"${DBT_SCHEMA}"'"}' \
+            --profiles-dir "$DBT_PROFILES_DIR"
