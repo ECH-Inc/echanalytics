@@ -54,6 +54,7 @@ jobs:
         with:
           branch: dev
           name: dbt-manifest
+          run-id: ${{ github.event.workflow_run.id }}
           path: ./state
           if_no_artifact_found: warn
         continue-on-error: true
