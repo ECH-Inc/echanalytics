@@ -28,3 +28,17 @@ echanalytics:
       schema: "{{ env_var('SNOWFLAKE_SCHEMA') }}"
       warehouse: "{{ env_var('SNOWFLAKE_WH') }}"
       threads: 1
+
+    ci_cd:
+      type: snowflake
+      authenticator: oauth
+      oauth_client_id: "{{ env_var('SNOWFLAKE_CLIENT_ID') }}"
+      oauth_client_secret: "{{ env_var('SNOWFLAKE_CLIENT_SECRET') }}"
+      token: "{{ env_var('SNOWFLAKE_REFRESH_TOKEN') }}"
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+      role: "{{ env_var('SNOWFLAKE_ROLE') }}"
+      user: "{{ env_var('SNOWFLAKE_USER') }}"
+      database: "{{ env_var('SNOWFLAKE_DB') }}"
+      schema: "{{ env_var('SNOWFLAKE_SCHEMA') }}"
+      warehouse: "{{ env_var('SNOWFLAKE_WH') }}"
+      threads: 1
