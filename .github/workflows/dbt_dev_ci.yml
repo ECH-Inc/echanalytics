@@ -53,15 +53,16 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: dbt-manifest
-          run-id: ${{ github.event.workflow_run.id }}
-          path: ./state
-        continue-on-error: true
+
+      - name: Display structure of downloaded files
+        run: ls -R
+
 
       - name: dbt Build (Development)
         # run: dbt build --target prod
         run: |
-          if [ -f "./state/manifest.json" ]; then
-            dbt build --target dev --select state:modified+ --state ./state
+          if [ -f " manifest.json" ]; then
+            dbt build --target dev --select state:modified+ --state .
           else
             dbt build --target dev # Fallback to full build if no manifest exists
           fi
