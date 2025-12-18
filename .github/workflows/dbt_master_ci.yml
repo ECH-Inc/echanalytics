@@ -17,6 +17,7 @@ jobs:
         SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
         SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
         SNOWFLAKE_DB: ${{ secrets.SNOWFLAKE_DB }}
+        SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
         SNOWFLAKE_WH: ${{ secrets.SNOWFLAKE_WH }}
         SNOWFLAKE_CLIENT_ID: ${{ secrets.SNOWFLAKE_CLIENT_ID }}
         SNOWFLAKE_CLIENT_SECRET: ${{ secrets.SNOWFLAKE_CLIENT_SECRET }}
