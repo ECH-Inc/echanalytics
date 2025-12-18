@@ -2,10 +2,11 @@ name: dbt Snowflake CD & Docs
 on:
   # Trigger when code is merged or pushed directly to main branch
   push:
-    branches: [main]
+    branches: [master]
   workflow_dispatch: # Allow manual trigger if required
 
 permissions:
+  actions: read
   contents: read
   pages: write
   id-token: write
@@ -43,24 +44,8 @@ jobs:
         run: dbt deps
 
       # CD: Deploy directly to Production
-      - name: Download Previous Manifest
-        # Fetches manifest from the last successful CD run for state comparison
-        uses: actions/download-artifact@v4
-        with:
-          branch: main
-          name: dbt-manifest
-          path: ./state
-          if_no_artifact_found: warn
-        continue-on-error: true
-
       - name: dbt Build (Production)
-        # run: dbt build --target prod
-        run: |
-          if [ -f "./state/manifest.json" ]; then
-            dbt build --target prod --select state:modified+ --state ./state
-          else
-            dbt build --target prod # Fallback to full build if no manifest exists
-          fi
+        run: dbt build --target prod
 
       - name: Upload Manifest for Next CD Run
         # This keeps your state persistent for the next 'state:modified' run

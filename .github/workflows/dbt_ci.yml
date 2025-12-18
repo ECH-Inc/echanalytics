@@ -1,4 +1,4 @@
-name: dbt Snowflake Dev CI
+name: dbt Snowflake CI
 on:
   # Trigger when a PR is created or updated the target dev branch
   pull_request:
@@ -13,6 +13,9 @@ on:
 jobs:
   dbt-dev-ci:
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
     environment: development
     env:
         SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
@@ -33,6 +36,9 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
 
       - name: Install dbt Adapter
         run: |
@@ -48,28 +54,47 @@ jobs:
       - name: Run dbt compile
         run: dbt compile --profiles-dir .
 
+
+      # Find latest successful run on master
+      - name: Find latest successful run on master
+        id: latest_run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          run_id=$(gh api repos/${{ github.repository }}/actions/runs \
+            --jq '.workflow_runs
+                 | map(select(.head_branch=="master" and .conclusion=="success"))
+                 | .[0].id')
+          if [ -z "$run_id" ] || [ "$run_id" = "null" ]; then
+            echo "No successful runs found on master"
+            echo "has_run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Discovered run-id=$run_id"
+            echo "has_run=true" >> "$GITHUB_OUTPUT"
+            echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Download Previous Manifest
         # Fetches manifest from the last successful CI run for state comparison
+        if: steps.latest_run.outputs.has_run == 'true'
         uses: actions/download-artifact@v4
-        with:
-          branch: dev
-          name: dbt-manifest
-          path: ./state
-          if_no_artifact_found: warn
         continue-on-error: true
+        with:
+          name: dbt-manifest
+          run-id: ${{ steps.latest_run.outputs.run_id }}
+          path: ./state
+          github-token: ${{ github.token }}
+
+      - name: Display structure of downloaded files
+        run: ls -lah ./state || true
+
 
       - name: dbt Build (Development)
-        # run: dbt build --target prod
         run: |
           if [ -f "./state/manifest.json" ]; then
-            dbt build --target dev --select state:modified+ --state ./state
+            echo "Found previous manifest -> using state to build modified models"
+            dbt build --target dev --select state:modified --state ./state
           else
+            echo "No previous manifest -> building all"
             dbt build --target dev # Fallback to full build if no manifest exists
           fi
-      
-      - name: Upload Manifest for Next Dev CI Run
-        # This keeps your state persistent for the next 'state:modified' run
-        uses: actions/upload-artifact@v4
-        with:
-          name: dbt-manifest
-          path: target/manifest.json
