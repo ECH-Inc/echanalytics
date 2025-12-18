@@ -1,4 +1,4 @@
-name: dbt Snowflake Dev CI
+name: dbt Snowflake CI
 on:
   # Trigger when a PR is created or updated the target dev branch
   pull_request:

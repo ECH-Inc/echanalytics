@@ -34,9 +34,6 @@ jobs:
         uses: actions/setup-python@v5
         with: 
           python-version: '3.12'
-      
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get install -y jq
         
       - name: Install dbt Adapter
         run: |
@@ -46,49 +43,9 @@ jobs:
       - name: Install dbt packages
         run: dbt deps
 
-      # Find latest successful run on master
-      - name: Find latest successful run on master
-        id: latest_run
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          run_id=$(gh api repos/${{ github.repository }}/actions/runs \
-            --jq '.workflow_runs
-                 | map(select(.head_branch=="master" and .conclusion=="success"))
-                 | .[0].id')
-          if [ -z "$run_id" ] || [ "$run_id" = "null" ]; then
-            echo "No successful runs found on master"
-            echo "has_run=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "Discovered run-id=$run_id"
-            echo "has_run=true" >> "$GITHUB_OUTPUT"
-            echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
-          fi
-
       # CD: Deploy directly to Production
-      - name: Download Previous Manifest
-        # Fetches manifest from the last successful CD run for state comparison
-        uses: actions/download-artifact@v4
-        continue-on-error: true
-        with:
-          name: dbt-manifest
-          run-id: ${{ github.event.workflow_run.id }}
-          path: ./state
-          github-token: ${{ github.token }}
-        
-      - name: Display structure of downloaded files
-        run: ls -lah ./state || true
-
       - name: dbt Build (Production)
-        # run: dbt build --target prod
-        run: |
-          if [ -f "./state/manifest.json" ]; then
-            echo "Found previous manifest -> using state to build modified models"
-            dbt build --target prod --select state:modified+ --state ./state
-          else
-            echo "No previous manifest -> building all"
-            dbt build --target prod # Fallback to full build if no manifest exists
-          fi
+        run: dbt build --target prod
 
       - name: Upload Manifest for Next CD Run
         # This keeps your state persistent for the next 'state:modified' run
