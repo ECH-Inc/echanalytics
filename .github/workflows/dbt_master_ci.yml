@@ -1,19 +1,16 @@
-name: dbt Snowflake CD & Docs
+name: dbt Snowflake Master CI
 on:
-  # Trigger when code is merged or pushed directly to main branch
-  push:
+  # Trigger when a PR is created or updated the target master branch
+  pull_request:
     branches: [master]
-  workflow_dispatch: # Allow manual trigger if required
-
-permissions:
-  actions: read
-  contents: read
-  pages: write
-  id-token: write
+    types: [opened, synchronize, reopened]
 
 jobs:
-  dbt-deploy-slim:
+  dbt-master-ci:
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
     environment: production
     env:
         SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
@@ -25,6 +22,7 @@ jobs:
         SNOWFLAKE_CLIENT_ID: ${{ secrets.SNOWFLAKE_CLIENT_ID }}
         SNOWFLAKE_CLIENT_SECRET: ${{ secrets.SNOWFLAKE_CLIENT_SECRET }}
         SNOWFLAKE_REFRESH_TOKEN: ${{ secrets.SNOWFLAKE_REFRESH_TOKEN }}
+        DBT_SCHEMA: "CI_${{ github.event.pull_request.number || 'PROD' }}"
 
     steps:
       - name: Checkout Code
@@ -34,10 +32,10 @@ jobs:
         uses: actions/setup-python@v5
         with: 
           python-version: '3.12'
-      
+
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
-        
+
       - name: Install dbt Adapter
         run: |
           python -m pip install --upgrade pip
@@ -46,7 +44,6 @@ jobs:
       - name: Install dbt packages
         run: dbt deps
 
-      # Find latest successful run on master
       - name: Find latest successful run on master
         id: latest_run
         env:
@@ -65,49 +62,52 @@ jobs:
             echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
           fi
 
-      # CD: Deploy directly to Production
+      # Build temporary profile for final PR testing
+      - name: Build dbt Profiles
+        run: |
+          mkdir -p ~/.dbt
+          echo "default:
+            outputs:
+              ci_cd:
+                type: snowflake
+                authenticator: oauth
+                oauth_client_id: SNOWFLAKE_CLIENT_ID
+                oauth_client_secret: SNOWFLAKE_CLIENT_SECRET
+                token: SNOWFLAKE_REFRESH_TOKEN
+                account: $SNOWFLAKE_ACCOUNT
+                role: $SNOWFLAKE_ROLE
+                user: $SNOWFLAKE_USER
+                database: $SNOWFLAKE_DATABASE
+                warehouse: $SNOWFLAKE_WAREHOUSE
+                schema: $DBT_SCHEMA
+                threads: 1
+            target: ci_cd" > ~/.dbt/profiles.yml
+
       - name: Download Previous Manifest
-        # Fetches manifest from the last successful CD run for state comparison
+        # Fetches manifest from the last successful CI run for state comparison
+        if: steps.latest_run.outputs.has_run == 'true'
         uses: actions/download-artifact@v4
         continue-on-error: true
         with:
           name: dbt-manifest
-          run-id: ${{ github.event.workflow_run.id }}
+          run-id: ${{ steps.latest_run.outputs.run_id }}
           path: ./state
           github-token: ${{ github.token }}
-        
+
       - name: Display structure of downloaded files
         run: ls -lah ./state || true
-
-      - name: dbt Build (Production)
-        # run: dbt build --target prod
+      # TEST: Run on Pull Requests (Slim CI)
+      - name: Run dbt Build
         run: |
           if [ -f "./state/manifest.json" ]; then
             echo "Found previous manifest -> using state to build modified models"
-            dbt build --target prod --select state:modified+ --state ./state
+            dbt build --select state:modified --state ./state
           else
             echo "No previous manifest -> building all"
-            dbt build --target prod # Fallback to full build if no manifest exists
+            dbt build # Fallback to full build if no manifest exists
           fi
 
-      - name: Upload Manifest for Next CD Run
-        # This keeps your state persistent for the next 'state:modified' run
-        uses: actions/upload-artifact@v4
-        with:
-          name: dbt-manifest
-          path: target/manifest.json
-        
-      # Docs: Generate and Deploy to GitHub Pages
-      - name: Generate Docs
+      - name: Cleanup CI Schema
+        if: always() && github.event_name == 'pull_request'
         run: |
-          dbt docs generate --target prod --static
-          mkdir -p public
-          cp target/static_index.html public/index.html
-
-      - name: Upload Docs Artifact to GitHub Pages
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./public
-
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v4
+          dbt run-operation drop_schema_operation --args "{schema_name: $DBT_SCHEMA" --target ci_cd
