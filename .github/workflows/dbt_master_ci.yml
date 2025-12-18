@@ -17,12 +17,11 @@ jobs:
         SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
         SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
         SNOWFLAKE_DB: ${{ secrets.SNOWFLAKE_DB }}
-        SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
+        SNOWFLAKE_SCHEMA: "CI_${{ github.event.pull_request.number || 'MASTER_CI' }}"
         SNOWFLAKE_WH: ${{ secrets.SNOWFLAKE_WH }}
         SNOWFLAKE_CLIENT_ID: ${{ secrets.SNOWFLAKE_CLIENT_ID }}
         SNOWFLAKE_CLIENT_SECRET: ${{ secrets.SNOWFLAKE_CLIENT_SECRET }}
         SNOWFLAKE_REFRESH_TOKEN: ${{ secrets.SNOWFLAKE_REFRESH_TOKEN }}
-        DBT_SCHEMA: "CI_${{ github.event.pull_request.number || 'MASTER_CI' }}"
 
     steps:
       - name: Checkout Code
@@ -61,37 +60,12 @@ jobs:
             echo "has_run=true" >> "$GITHUB_OUTPUT"
             echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
           fi
-
-      # Build temporary profile for final PR testing
-      - name: Build dbt Profiles
-        run: |
-          mkdir -p ~/.dbt
-          echo "echanalytics:
-            outputs:
-              ci_cd:
-                type: snowflake
-                authenticator: oauth
-                oauth_client_id: SNOWFLAKE_CLIENT_ID
-                oauth_client_secret: SNOWFLAKE_CLIENT_SECRET
-                token: SNOWFLAKE_REFRESH_TOKEN
-                account: $SNOWFLAKE_ACCOUNT
-                role: $SNOWFLAKE_ROLE
-                user: $SNOWFLAKE_USER
-                database: $SNOWFLAKE_DATABASE
-                warehouse: $SNOWFLAKE_WAREHOUSE
-                schema: $DBT_SCHEMA
-                threads: 1
-            target: ci_cd" > ~/.dbt/profiles.yml
-          
-          # Point dbt at this temporary profile directory for subsequent steps
-          echo "DBT_PROFILES_DIR=$PWD/.ci/profiles" >> $GITHUB_ENV
-
       
       - name: dbt debug (with temp profile)
-        run: dbt debug --profiles-dir "$DBT_PROFILES_DIR"
+        run: dbt debug --target ci_cd
 
       - name: dbt compile (with temp profile)
-        run: dbt compile --profiles-dir "$DBT_PROFILES_DIR"
+        run: dbt compile --target ci_cd
 
       - name: Download Previous Manifest
         # Fetches manifest from the last successful CI run for state comparison
@@ -111,10 +85,10 @@ jobs:
         run: |
           if [ -f "./state/manifest.json" ]; then
             echo "Found previous manifest -> using state to build modified models"
-            dbt build --profiles-dir "$DBT_PROFILES_DIR" --select state:modified --state ./state
+            dbt build --target ci_cd --select state:modified --state ./state
           else
             echo "No previous manifest -> building all"
-            dbt build --profiles-dir "$DBT_PROFILES_DIR" # Fallback to full build if no manifest exists
+            dbt build target ci_cd # Fallback to full build if no manifest exists
           fi
 
       - name: Cleanup CI Schema
@@ -122,4 +96,4 @@ jobs:
         run: |
           dbt run-operation drop_schema_operation \
             --args '{"schema_name": "'"${DBT_SCHEMA}"'"}' \
-            --profiles-dir "$DBT_PROFILES_DIR"
+            --target ci_cd
