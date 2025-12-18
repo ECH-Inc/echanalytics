@@ -54,6 +54,7 @@ jobs:
       - name: Download Previous Manifest
         # Fetches manifest from the last successful CI run for state comparison
         uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           name: dbt-manifest
           run-id: ${{ github.event.workflow_run.id }}
@@ -61,15 +62,17 @@ jobs:
           github-token: ${{ github.token }}
 
       - name: Display structure of downloaded files
-        run: ls -R
+        run: ls -lah ./state || true
 
 
       - name: dbt Build (Development)
         # run: dbt build --target prod
         run: |
           if [ -f " ./state/manifest.json" ]; then
-            dbt build --target dev --select state:modified+ --state ./state
+            echo "Found previous manifest -> using state to build modified models"
+            dbt build --target dev --select state:modified --state ./state
           else
+            echo "No previous manifest -> building all"
             dbt build --target dev # Fallback to full build if no manifest exists
           fi
       
