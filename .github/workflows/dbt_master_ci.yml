@@ -8,6 +8,9 @@ on:
 jobs:
   dbt-master-ci:
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
     environment: production
     env:
         SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
@@ -29,7 +32,10 @@ jobs:
         uses: actions/setup-python@v5
         with: 
           python-version: '3.12'
-        
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
       - name: Install dbt Adapter
         run: |
           python -m pip install --upgrade pip
@@ -37,6 +43,24 @@ jobs:
 
       - name: Install dbt packages
         run: dbt deps
+
+      - name: Find latest successful run on master
+        id: latest_run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          run_id=$(gh api repos/${{ github.repository }}/actions/runs \
+            --jq '.workflow_runs
+                 | map(select(.head_branch=="master" and .conclusion=="success"))
+                 | .[0].id')
+          if [ -z "$run_id" ] || [ "$run_id" = "null" ]; then
+            echo "No successful runs found on master"
+            echo "has_run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Discovered run-id=$run_id"
+            echo "has_run=true" >> "$GITHUB_OUTPUT"
+            echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
+          fi
 
       # Build temporary profile for final PR testing
       - name: Build dbt Profiles
@@ -59,9 +83,29 @@ jobs:
                 threads: 1
             target: ci_cd" > ~/.dbt/profiles.yml
 
+      - name: Download Previous Manifest
+        # Fetches manifest from the last successful CI run for state comparison
+        if: steps.latest_run.outputs.has_run == 'true'
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: dbt-manifest
+          run-id: ${{ steps.latest_run.outputs.run_id }}
+          path: ./state
+          github-token: ${{ github.token }}
+
+      - name: Display structure of downloaded files
+        run: ls -lah ./state || true
       # TEST: Run on Pull Requests (Slim CI)
       - name: Run dbt Build
-        run: dbt build # Fallback to full build if no manifest exists
+        run: |
+          if [ -f " ./state/manifest.json" ]; then
+            echo "Found previous manifest -> using state to build modified models"
+            dbt build --select state:modified --state ./state
+          else
+            echo "No previous manifest -> building all"
+            dbt build # Fallback to full build if no manifest exists
+          fi
 
       - name: Cleanup CI Schema
         if: always() && github.event_name == 'pull_request'
