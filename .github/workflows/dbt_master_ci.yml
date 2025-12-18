@@ -99,7 +99,7 @@ jobs:
       # TEST: Run on Pull Requests (Slim CI)
       - name: Run dbt Build
         run: |
-          if [ -f " ./state/manifest.json" ]; then
+          if [ -f "./state/manifest.json" ]; then
             echo "Found previous manifest -> using state to build modified models"
             dbt build --select state:modified --state ./state
           else

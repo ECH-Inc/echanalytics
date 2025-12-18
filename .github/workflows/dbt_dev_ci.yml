@@ -91,7 +91,7 @@ jobs:
 
       - name: dbt Build (Development)
         run: |
-          if [ -f " ./state/manifest.json" ]; then
+          if [ -f "./state/manifest.json" ]; then
             echo "Found previous manifest -> using state to build modified models"
             dbt build --target dev --select state:modified --state ./state
           else
