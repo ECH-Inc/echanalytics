@@ -51,3 +51,21 @@ sources:
       identifier: SHARED_VISIT_DAILY_ACTIVITY_INCREMENTAL
     - name: visit_rating_funder
       identifier: SHARED_VISIT_RATING_FUNDER_INCREMENTAL
+    - name: authorizations
+      identifier: SHARED_AUTHORIZATIONS
+    - name: authorization_services
+      identifier: SHARED_AUTHORIZATION_SERVICES
+    - name: authorization_usages
+      identifier: SHARED_AUTHORIZATION_USAGES
+    - name: authorization_billcodes
+      identifier: SHARED_AUTHORIZATION_BILLCODES
+    - name: sah_client
+      identifier: SHARED_SAH_CLIENT
+    - name: sah_program
+      identifier: SHARED_SAH_PROGRAM
+    - name: sah_program_classification
+      identifier: SHARED_SAH_PROGRAM_CLASSIFICATION
+    - name: sah_program_percentage
+      identifier: SHARED_SAH_PROGRAM_PERCENTAGE
+    - name: sah_client_details_date_effective
+      identifier: SHARED_SAH_CLIENT_DETAILS_DATE_EFFECTIVE
