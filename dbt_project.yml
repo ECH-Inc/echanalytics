@@ -34,6 +34,8 @@ models:
     # Config indicated by + and applies to all files under models/example/
     staging:
       +materialized: view
+    intermediate:
+      +materialized: table
     marts:
       core:
         +materialized: table
@@ -43,3 +45,6 @@ models:
         +materialized: table
       whs:
         +materialized: table
+    analytics:
+      community_services:
+        +materialized: view
