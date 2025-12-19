@@ -51,3 +51,11 @@ sources:
       identifier: SHARED_VISIT_DAILY_ACTIVITY_INCREMENTAL
     - name: visit_rating_funder
       identifier: SHARED_VISIT_RATING_FUNDER_INCREMENTAL
+    - name: authorizations
+      identifier: SHARED_AUTHORIZATIONS
+    - name: authorization_services
+      identifier: SHARED_AUTHORIZATION_SERVICES
+    - name: authorization_usages
+      identifier: SHARED_AUTHORIZATION_USAGES
+    - name: authorization_billcodes
+      identifier: SHARED_AUTHORIZATION_BILLCODES
