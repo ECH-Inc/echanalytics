@@ -99,3 +99,7 @@ sources:
       identifier: SHARED_GROUP
     - name: guid_relation
       identifier: SHARED_TBL_GUID_RELATION
+    - name: department
+      identifier: SHARED_DEPARTMENT
+    - name: skill
+      identifier: SHARED_SKILL
