@@ -1,0 +1,35 @@
+echanalytics:
+  target: test
+  outputs:
+    test:
+      type: snowflake
+      account: not_needed
+      user: not_needed
+      role: to_be_replaced
+      database: to_be_replaced
+      schema: to_be_replaced
+      warehouse: to_be_replaced
+      threads: 1
+
+    prod:
+      type: snowflake
+      account: not_needed
+      user: not_needed
+      role: to_be_replaced
+      database: to_be_replaced
+      schema: to_be_replaced
+      warehouse: to_be_replaced
+      threads: 1
+
+    doc:
+      type: snowflake
+      authenticator: oauth
+      oauth_client_id: "{{ env_var('SNOWFLAKE_CLIENT_ID') }}"
+      oauth_client_secret: "{{ env_var('SNOWFLAKE_CLIENT_SECRET') }}"
+      token: "{{ env_var('SNOWFLAKE_REFRESH_TOKEN') }}"
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+      role: "{{ env_var('SNOWFLAKE_ROLE') }}"
+      database: "{{ env_var('SNOWFLAKE_DATABASE') }}"
+      schema: "{{ env_var('SNOWFLAKE_SCHEMA') }}"
+      warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE') }}"
+      threads: 1

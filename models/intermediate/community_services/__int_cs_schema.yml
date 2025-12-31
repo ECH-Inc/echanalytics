@@ -1,0 +1,6 @@
+models:
+  - name: int_authorizations_budget_recalculated
+    description: Recalculates authorization budgets by distributing the total amount across the start and end date range
+  
+  - name: int_service_fundings
+    description: All services with associated funding program in community services

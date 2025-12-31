@@ -1,0 +1,118 @@
+name: dbt Snowflake CD & Docs Workflow
+run-name: PR from ${{ github.actor }} accepted - triggered a ${{ github.event_name }}
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  actions: read
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deployment:
+    name: "Run on Accepted PR"
+    runs-on: ubuntu-latest
+    environment: prod # Must match the OIDC subject's environment
+    env:
+      SNOWFLAKE_CLI_FEATURES_ENABLE_DBT: true
+      SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+      SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
+      SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
+      SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
+      SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+      EXT_ACCESS: ${{ vars.SNOWFLAKE_DBT_EXT_ACCESS }}
+
+    steps:
+      # Check out repository code
+      # Gets the latest code from the pull request branch
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Install Snowflake CLI
+        uses: snowflakedb/snowflake-cli-action@v2.0
+        with: # Ensures Snowflake CLI will search for OIDC users matching this subject
+          use-oidc: true
+
+      - name: Check Snowflake CLI Version
+        run: snow --version
+
+      - name: Generate profiles.yml (literal values)
+        run: |
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml <<YAML
+          echanalytics:                # must match dbt_project.yml 'profile'
+            target: test
+            outputs:
+              test:
+                type: snowflake
+                account: "${SNOWFLAKE_ACCOUNT}"
+                role: "${SNOWFLAKE_ROLE}"
+                database: "${SNOWFLAKE_DATABASE}"
+                warehouse: "${SNOWFLAKE_WAREHOUSE}"
+                schema: "${SNOWFLAKE_SCHEMA}"
+                threads: 1
+          YAML
+          echo "Generated ~/.dbt/profiles.yml"; sed -n '1,120p' ~/.dbt/profiles.yml
+
+      # The -x is shorthand for --temporary-connection
+      - name: Check Snowflake CLI Connection
+        run: snow connection test -x
+
+      # The --default-target flag ensures the dbt project object compiles and executes with your prod target
+      - name: Create a new dbt project object
+        run: snow dbt deploy ech_analytics_dbt_project --external-access-integration $EXT_ACCESS --profiles-dir ~/.dbt --default-target prod --force -x
+
+      - name: Execute build on dbt project object
+        run: snow dbt execute -x ech_analytics_dbt_project_test run --target prod
+
+  generate-docs:
+    needs: deployment
+    name: Generate dbt docs
+    runs-on: ubuntu-latest
+    environment: doc
+    env:
+      SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+      SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
+      SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
+      SNOWFLAKE_CLIENT_ID: ${{ secrets.SNOWFLAKE_CLIENT_ID }}
+      SNOWFLAKE_CLIENT_SECRET: ${{ secrets.SNOWFLAKE_CLIENT_SECRET }}
+      SNOWFLAKE_REFRESH_TOKEN: ${{ secrets.SNOWFLAKE_REFRESH_TOKEN }}
+      SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
+      SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+    
+    steps:
+      # Check out repository code
+      - name: Check out repository code
+        uses: actions/checkout@v4
+        
+      # Install Python + dbt-core so we can run `dbt deps`
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dbt-core
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Run dbt deps at the repo root (where dbt_project.yml + packages.yml live)
+      - name: Install dbt packages (dbt deps)
+        run: dbt deps
+
+      # Docs: Generate and Deploy to GitHub Pages
+      - name: Generate Docs
+        run: |
+          dbt docs generate --target doc --static
+          mkdir -p public
+          cp target/static_index.html public/index.html
+
+      - name: Upload Docs Artifact to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./public
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4

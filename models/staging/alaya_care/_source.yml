@@ -1,0 +1,101 @@
+sources:
+- name: alaya_care
+  description: Alaya Care shared database
+  database: PROD_ALAYACARESHARE
+  schema: 1D211AD7-BDC7-49D3-B4F0-725CD96273D0
+  quoting:
+    schema: true
+  tables:
+    - name: client
+      identifier: SHARED_CLIENT_INCREMENTAL
+      description: Client profile data from Alaya Care
+    - name: client_tag
+      identifier: SHARED_CLIENT_TAGS
+    - name: client_care_plan
+      identifier: SHARED_CLIENT_CARE_PLAN
+    - name: client_contact
+      identifier: SHARED_CLIENT_CONTACT
+    - name: client_rates
+      identifier: SHARED_CLIENT_RATES
+    - name: client_risk
+      identifier: SHARED_CLIENT_RISK
+    - name: client_progress_notes
+      identifier: SHARED_CLIENT_PROGRESS_NOTES
+    - name: funder
+      identifier: SHARED_FUNDER
+      description: funder data from Alaya Care
+    - name: funding_block
+      identifier: SHARED_FUNDING_BLOCK
+    - name: service
+      identifier: SHARED_SERVICE_INCREMENTAL
+      description: Client service data from Alaya Care
+    - name: service_funder
+      identifier: SHARED_SERVICE_FUNDER_INCREMENTAL
+    - name: facility
+      identifier: SHARED_FACILITY
+      description: Service facility from Alaya Care
+    - name: service_code
+      identifier: SHARED_SERVICE_CODE
+    - name: visit
+      identifier: SHARED_VISIT_INCREMENTAL
+      description: Client visit data from Alaya Care
+    - name: visit_note
+      identifier: SHARED_VISIT_NOTE_INCREMENTAL
+      description: The note for each client visit data from Alaya Care
+    - name: visit_tag
+      identifier: SHARED_VISIT_TAG_INCREMENTAL
+      description: The tag for each client visit data from Alaya Care
+    - name: visit_recurrence_detail
+      identifier: SHARED_VISIT_RECURRENCE_DETAIL_INCREMENTAL
+    - name: visit_daily_activity
+      identifier: SHARED_VISIT_DAILY_ACTIVITY_INCREMENTAL
+    - name: visit_rating_funder
+      identifier: SHARED_VISIT_RATING_FUNDER_INCREMENTAL
+    - name: authorizations
+      identifier: SHARED_AUTHORIZATIONS
+    - name: authorization_services
+      identifier: SHARED_AUTHORIZATION_SERVICES
+    - name: authorization_usages
+      identifier: SHARED_AUTHORIZATION_USAGES
+    - name: authorization_billcodes
+      identifier: SHARED_AUTHORIZATION_BILLCODES
+    - name: sah_client
+      identifier: SHARED_SAH_CLIENT
+    - name: sah_program
+      identifier: SHARED_SAH_PROGRAM
+    - name: sah_program_classification
+      identifier: SHARED_SAH_PROGRAM_CLASSIFICATION
+    - name: sah_program_percentage
+      identifier: SHARED_SAH_PROGRAM_PERCENTAGE
+    - name: sah_client_details_date_effective
+      identifier: SHARED_SAH_CLIENT_DETAILS_DATE_EFFECTIVE
+    - name: employee
+      identifier: SHARED_EMPLOYEE_INCREMENTAL
+    - name: employee_contact
+      identifier: SHARED_EMPLOYEE_CONTACT
+    - name: employee_facility
+      identifier: SHARED_EMPLOYEE_FACILITY
+    - name: employee_portal
+      identifier: SHARED_EMPLOYEE_PORTAL
+    - name: employee_tags
+      identifier: SHARED_EMPLOYEE_TAGS
+    - name: employee_associated
+      identifier: SHARED_EMPLOYEE_ASSOCIATED
+    - name: employee_department
+      identifier: SHARED_EMPLOYEE_DEPARTMENT
+    - name: employee_experienced
+      identifier: SHARED_EMPLOYEE_EXPERIENCED
+    - name: employee_group
+      identifier: SHARED_EMPLOYEE_GROUP
+    - name: employee_history
+      identifier: SHARED_EMPLOYEE_HISTORY
+    - name: employee_rule
+      identifier: SHARED_EMPLOYEE_RULE
+    - name: employee_skill
+      identifier: SHARED_EMPLOYEE_SKILL
+    - name: employee_termination_note
+      identifier: SHARED_EMPLOYEE_TERMINATION_NOTE
+    - name: group
+      identifier: SHARED_GROUP
+    - name: guid_relation
+      identifier: SHARED_TBL_GUID_RELATION

@@ -1,0 +1,76 @@
+name: dbt Snowflake CI Workflow
+run-name: PR opened by ${{ github.actor }}
+on:
+  # Trigger when a PR is created or updated the target main branch
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [main]
+
+permissions:
+  contents: read
+  id-token: write
+  
+jobs:
+  snowflake-dbt-ci-job:
+    name: "Run on dbt CI workflow"
+    runs-on: ubuntu-latest
+    environment: test
+    env:
+      SNOWFLAKE_CLI_FEATURES_ENABLE_DBT: true
+      SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+      SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
+      SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
+      SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
+      SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+      EXT_ACCESS: ${{ vars.SNOWFLAKE_DBT_EXT_ACCESS }}
+
+    steps:
+      # Check out repository code
+      # Gets the latest code from the incoming pull request
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Install Snowflake CLI
+        uses: snowflakedb/snowflake-cli-action@v2.0
+        with: # Ensures Snowflake CLI will search for OIDC users matching this subject
+          use-oidc: true
+
+      - name: Check Snowflake CLI Version
+        run: snow --version
+
+      - name: Generate profiles.yml (literal values)
+        run: |
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml <<YAML
+          echanalytics:                # must match dbt_project.yml 'profile'
+            target: test
+            outputs:
+              test:
+                type: snowflake
+                account: "${SNOWFLAKE_ACCOUNT}"
+                role: "${SNOWFLAKE_ROLE}"
+                database: "${SNOWFLAKE_DATABASE}"
+                warehouse: "${SNOWFLAKE_WAREHOUSE}"
+                schema: "${SNOWFLAKE_SCHEMA}"
+                threads: 1
+          YAML
+          echo "Generated ~/.dbt/profiles.yml"; sed -n '1,120p' ~/.dbt/profiles.yml
+
+
+      # The -x is shorthand for --temporary-connection
+      - name: Check Snowflake CLI connection
+        run: snow connection test -x
+        
+      # The --force setting creates the object or updates it if it already exists
+      # You can remove the "-- source" flag if your dbt_project.yml is at root of your repo
+      - name: Create a new tester dbt project object
+        run: snow dbt deploy ech_analytics_dbt_project_test --external-access-integration $EXT_ACCESS --profiles-dir ~/.dbt --default-target test --force -x
+
+      - name: List all of the snowflake dbt project objects in your account
+        run: snow dbt list -x
+        
+      - name: Execute run on tester dbt project object
+        run: snow dbt execute -x ech_analytics_dbt_project_test run --target test
+
+      - name: Execute data quality test on tester dbt project object
+        run: snow dbt execute -x ech_analytics_dbt_project_test test --target test

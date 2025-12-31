@@ -1,0 +1,99 @@
+models:
+  - name: dim_cs_clients
+    description: Client basic demographic profile data from Alaya Care
+    columns:
+      - name: ac_client_id
+        description: Unique identifier for each customer in Alaya Care
+        tests:
+          - unique
+          - not_null
+      - name: mac_id
+        description: Unique identifier for each customer in My Aged Care (MAC) portal
+      - name: crm_id
+        description: Unique identifier for each customer from ECH CRM system
+  
+  - name: dim_services
+    description: All services that clients have in Alaya Care
+    columns:
+      - name: service_id
+        description: Unique identifier for each service of each client
+        tests:
+          - unique
+          - not_null
+      - name: ac_client_id
+        description: Unique identifer for client in Alaya Care
+      - name: service_description
+      - name: service_start_date
+        description: Service start date. Set default start date to 01-01-1970 if service start date is null
+      - name: service_end_date
+        description: '{{ doc("service_end_date") }}'
+      - name: service_projected_end_date
+      - name: service_status
+      - name: service_status_reason
+      - name: status_effective_date
+        description: The date of the status become active
+      - name: status_end_date
+        description: The date when the status ceased to be active
+      - name: department_id
+        description: Unique identifier of department that the service belongs to
+      - name: department_name
+        description: Name of department that the service belongs to
+      - name: duration
+        description: Duration of each service in minutes
+      - name: funder_name
+        description: Funder name of the service
+      - name: funder_program
+        description: The funder program that a service belongs to (e.g. CHSP, HCP, SAH, etc...)
+  
+  - name: fact_client_visits
+    description: Client visits in the past. Only include visit with start date less than current date
+    columns:
+      - name: visit_id
+        tests:
+          - unique
+          - not_null
+      - name: guid
+      - name: start_at
+      - name: start_date
+      - name: start_time
+      - name: end_at
+      - name: end_date
+      - name: end_time
+      - name: visit_completed
+      - name: adl_complete
+      - name: cancel_code_id
+      - name: service_id
+      - name: service_code_id
+      - name: visit_approval_status
+      - name: visit_scheduled_duration
+      - name: account_type
+      - name: employee_id
+      - name: ac_client_id
+        tests:
+          - relationships:
+              to: ref('dim_cs_clients')
+              field: ac_client_id
+      - name: service_instructions
+      - name: visit_unit_qty
+      - name: visit_hours_bill
+      - name: break_minutes
+      - name: break_hours
+      - name: facility_id
+      - name: client_visit_facility
+      - name: visit_in_facility
+      - name: visit_recurrence
+      - name: has_note
+      - name: has_adl
+      - name: visit_computed_rate
+      - name: service_rrule_id
+      - name: computed_rate_external_id
+      - name: is_paid
+      - name: visit_missed_class
+      - name: visit_revenue
+      - name: visit_on_hold_reason
+      - name: visit_marked_for_resubmission
+      - name: in_out_of_recurrence_status
+      - name: recurrence_frequency_type
+      - name: visit_computed_rate_units
+      - name: department_id
+      - name: funder_program
