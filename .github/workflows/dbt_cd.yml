@@ -65,7 +65,7 @@ jobs:
         run: snow dbt deploy ech_analytics_dbt_project --external-access-integration $EXT_ACCESS --profiles-dir ~/.dbt --default-target prod --force -x
 
       - name: Execute build on dbt project object
-        run: snow dbt execute -x ech_analytics_dbt_project_test build --target prod
+        run: snow dbt execute -x ech_analytics_dbt_project build --target prod
 
   generate-docs:
     needs: deployment
