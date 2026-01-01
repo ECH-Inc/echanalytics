@@ -1,10 +1,12 @@
-WITH raw_visit_note AS(
+WITH raw_visit_note AS (
     SELECT *
     FROM {{ source('alaya_care', 'visit_note') }}
     WHERE _etl_is_deleted = FALSE
 ),
-flatten_cols AS(
-    SELECT note_id,
+
+flatten_cols AS (
+    SELECT
+        note_id,
         visit_id,
         visit_note_type,
         note,
@@ -16,5 +18,6 @@ flatten_cols AS(
         _etl_is_deleted
     FROM raw_visit_note
 )
+
 SELECT *
 FROM flatten_cols

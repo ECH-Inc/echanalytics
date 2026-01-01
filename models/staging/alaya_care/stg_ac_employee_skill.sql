@@ -1,9 +1,11 @@
-WITH raw_employee_skill AS(
+WITH raw_employee_skill AS (
     SELECT *
     FROM {{ source('alaya_care', 'employee_skill') }}
 ),
-flatten_cols AS(
-    SELECT employee_id,
+
+flatten_cols AS (
+    SELECT
+        employee_id,
         client_id,
         client_specific_skill,
         skill_id,
@@ -22,5 +24,6 @@ flatten_cols AS(
         updated_at
     FROM raw_employee_skill
 )
+
 SELECT *
 FROM flatten_cols

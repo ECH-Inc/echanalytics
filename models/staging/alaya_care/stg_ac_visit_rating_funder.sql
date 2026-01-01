@@ -1,10 +1,12 @@
-WITH raw_visit_rating_funder AS(
+WITH raw_visit_rating_funder AS (
     SELECT *
     FROM {{ source('alaya_care', 'visit_rating_funder') }}
     WHERE _etl_is_deleted = FALSE
 ),
-flatten_cols AS(
-    SELECT pk_id,
+
+flatten_cols AS (
+    SELECT
+        pk_id,
         id,
         visit_id,
         funder_id_coalesced,
@@ -20,5 +22,6 @@ flatten_cols AS(
         _etl_is_deleted
     FROM raw_visit_rating_funder
 )
+
 SELECT *
 FROM flatten_cols

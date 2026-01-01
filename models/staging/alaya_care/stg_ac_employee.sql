@@ -1,23 +1,24 @@
-WITH raw_employee AS(
+WITH employee AS (
     SELECT *
     FROM {{ source('alaya_care', 'employee') }}
     WHERE _etl_is_deleted = FALSE
 ),
-flatten_cols AS(
-    SELECT guid,
-        REPLACE(TO_CHAR(guid, '"AC"000000000'), ' ', '') AS alayacare_id,
+
+flatten_cols AS (
+    SELECT
+        guid,
         profile_id,
         employee_id,
         supplier_id,
         branch_id,
         superuser,
-        profile:d365_debtor_id::VARCHAR AS d365_debtor_id,
+        profile:d365_debtor_id::VARCHAR AS d_365_debtor_id,
         profile:uid::VARCHAR AS external_id,
         profile:import_id::VARCHAR AS import_id,
         profile:salutation::VARCHAR AS salutation,
-        profile:first_name::VARCHAR AS first_name,
+        profile:first_name::VARCHAR AS first_name, -- noqa: RF04
         profile:preferred_name::VARCHAR AS preferred_name,
-        profile:last_name::VARCHAR AS last_name,
+        profile:last_name::VARCHAR AS last_name, -- noqa: RF04
         profile:gender_code::VARCHAR AS gender_code,
         profile:birthday::DATE AS birthday,
         profile:marital_status::VARCHAR AS marital_status,
@@ -28,7 +29,8 @@ flatten_cols AS(
         profile:job_title::VARCHAR AS job_title,
         profile:start_date::DATE AS start_date,
         profile:termination_date::DATE AS termination_date,
-        profile:language_spoken_at_home_code::VARCHAR AS language_spoken_at_home_code,
+        profile:language_spoken_at_home_code::VARCHAR
+            AS language_spoken_at_home_code,
         profile:address::VARCHAR AS address,
         profile:city::VARCHAR AS suburb,
         profile:state::VARCHAR AS state,
@@ -39,36 +41,50 @@ flatten_cols AS(
         profile:billing_state::VARCHAR AS billing_state,
         profile:billing_post_code::VARCHAR AS billing_postcode,
         profile:billing_country::VARCHAR AS billing_country,
-        profile:ech_assisted_living_resident::VARCHAR AS ech_assisted_living_resident,
-        profile:consent_for_future_contacts::VARCHAR AS consent_for_future_contacts,
+        profile:ech_assisted_living_resident::VARCHAR
+            AS ech_assisted_living_resident,
+        profile:consent_for_future_contacts::VARCHAR
+            AS consent_for_future_contacts,
         profile:interpreter_required::VARCHAR AS interpreter_required,
         profile:sms_contact_number::VARCHAR AS sms_contact_number,
-        profile:reason_for_restricted_duties::VARCHAR AS restrictions,
-        profile:employee_work_restrictions_start_date::VARCHAR AS restrictions_start_date,
+        profile:reason_for_restricted_duties::VARCHAR AS restricted_reason,
+        profile:employee_work_restrictions_start_date::VARCHAR
+            AS restrictions_start_date,
         profile:scheduling_preference::VARCHAR AS scheduling_preference,
         profile:is_billing_contact::VARCHAR AS is_billing_contact,
         profile:abn::VARCHAR AS abn,
         profile:company::VARCHAR AS company,
         profile:has_company_car::VARCHAR AS has_company_car,
-        profile:supplier_expense_account_code::VARCHAR AS supplier_expense_account_code,
-        profile:contact_custom_stmt_delivery::VARCHAR AS contact_custom_stmt_delivery,
-        profile:consent_to_record_lgbtiqa_status::VARCHAR AS consent_to_record_lgbtiqa_status,
-        profile:consent_to_share_information::VARCHAR AS consent_to_share_information,
+        profile:supplier_expense_account_code::VARCHAR
+            AS supplier_expense_account_code,
+        profile:contact_custom_stmt_delivery::VARCHAR
+            AS contact_custom_stmt_delivery,
+        profile:consent_to_record_lgbtiqa_status::VARCHAR
+            AS consent_to_record_lgbtiqa_status,
+        profile:consent_to_share_information::VARCHAR
+            AS consent_to_share_information,
         profile:medicare_number::VARCHAR AS medicare_number,
         profile:medicare_reference::VARCHAR AS medicare_reference,
         profile:medicare_card_expiry::VARCHAR AS medicare_card_expiry,
         profile:ech_site_location_name::VARCHAR AS site_name,
-        profile:health_care_provider_number_mv_clinic::VARCHAR AS health_care_provider_number_mv_clinic,
-        profile:health_care_provider_number_hb_clinic::VARCHAR AS health_care_provider_number_hb_clinic,
-        profile:health_care_provider_number_ea_clinic::VARCHAR AS health_care_provider_number_ea_clinic,
-        profile:health_care_provider_number_vh_clinic::VARCHAR AS health_care_provider_number_vh_clinic,
-        profile:health_care_provider_number_cg_clinic::VARCHAR AS health_care_provider_number_cg_clinic,
+        profile:health_care_provider_number_mv_clinic::VARCHAR
+            AS health_care_provider_number_morphett_vale,
+        profile:health_care_provider_number_hb_clinic::VARCHAR
+            AS health_care_provider_number_henley_beach,
+        profile:health_care_provider_number_ea_clinic::VARCHAR
+            AS health_care_provider_number_encore,
+        profile:health_care_provider_number_vh_clinic::VARCHAR
+            AS health_care_provider_number_victor_harbor,
+        profile:health_care_provider_number_cg_clinic::VARCHAR
+            AS health_care_provider_number_college_grove,
         profile:has_carer::VARCHAR AS has_carer,
-        profile:ech_retirement_living_resident::VARCHAR AS ech_retirement_living_resident,
+        profile:ech_retirement_living_resident::VARCHAR
+            AS ech_retirement_living_resident,
         profile:is_using_pseudonym::VARCHAR AS is_using_pseudonym,
-        profile:household_composition_code::VARCHAR AS household_composition_code,
+        profile:household_composition_code::VARCHAR
+            AS household_composition_code,
         profile:remarks::VARCHAR AS remarks,
-        profile:tags_v2::VARCHAR AS tags_v2,
+        profile:tags_v2::VARCHAR AS tags_v_2,
         username,
         email,
         status,
@@ -84,10 +100,12 @@ flatten_cols AS(
         current_default_rate,
         current_default_rate_start_date,
         employee_current_caseload,
-        user_settings:setting_default_employee_availability::VARCHAR AS default_availability,
+        user_settings:setting_default_employee_availability::VARCHAR
+            AS default_availability,
         user_settings:employee_designation::VARCHAR AS designation,
         user_settings:employee_seniority_rank::VARCHAR AS seniority_rank,
-        user_settings:staffing_employee_position_type_id::VARCHAR AS position_type_id,
+        user_settings:staffing_employee_position_type_id::VARCHAR
+            AS position_type_id,
         user_settings:staffing_employee_position_type::VARCHAR AS position_type,
         user_settings:staffing_payroll_number::VARCHAR AS payroll_number,
         password_updated_at,
@@ -99,8 +117,10 @@ flatten_cols AS(
         __is_group_associations_enabled,
         _etl_updated_at_utc,
         _etl_is_deleted,
-        _hash
-    FROM raw_employee
+        _hash,
+        REPLACE(TO_CHAR(guid, '"AC"000000000'), ' ', '') AS alayacare_id
+    FROM employee
 )
+
 SELECT *
 FROM flatten_cols

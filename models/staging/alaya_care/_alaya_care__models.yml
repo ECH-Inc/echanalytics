@@ -1,0 +1,43 @@
+models:
+    - name: stg_ac_client
+      description: Client profile data from Alaya Care
+    - name: stg_ac_funder
+      description: funder data from Alaya Care
+    - name: stg_ac_funding_block
+    - name: stg_ac_service
+      description: Client service data from Alaya Care
+    - name: stg_ac_service_funder
+    - name: stg_ac_facility
+      description: Service facility from Alaya Care
+    - name: stg_ac_service_code
+    - name: stg_ac_visit
+      description: Client visit data from Alaya Care
+    - name: stg_ac_visit_note
+      description: The note for each client visit data from Alaya Care
+    - name: stg_ac_visit_tag
+      description: The tag for each client visit data from Alaya Care
+    - name: stg_ac_visit_recurrence_detail
+    - name: stg_ac_visit_daily_activity
+    - name: stg_ac_visit_rating_funder
+    - name: stg_ac_authorizations
+    - name: stg_ac_authorization_services
+    - name: stg_ac_authorization_usages
+    - name: stg_ac_authorization_billcodes
+    - name: stg_ac_sah_client
+    - name: stg_ac_sah_program
+    - name: stg_ac_sah_program_classification
+    - name: stg_ac_sah_program_percentage
+    - name: stg_ac_sah_client_details_date_effective
+    - name: stg_ac_employee
+    - name: stg_ac_employee_facility
+    - name: stg_ac_employee_associated
+    - name: stg_ac_employee_department
+    - name: stg_ac_employee_group
+    - name: stg_ac_employee_history
+    - name: stg_ac_employee_rule
+    - name: stg_ac_employee_skill
+    - name: stg_ac_employee_termination_note
+    - name: stg_ac_group
+    - name: stg_ac_guid_relation
+    - name: stg_ac_department
+    - name: stg_ac_skill

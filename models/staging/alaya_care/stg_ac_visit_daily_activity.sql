@@ -1,17 +1,20 @@
-WITH raw_visit_daily_activity AS(
+WITH raw_visit_daily_activity AS (
     SELECT *
     FROM {{ source('alaya_care', 'visit_daily_activity') }}
     WHERE _etl_is_deleted = FALSE
 ),
-flatten_cols AS(
-    SELECT visit_adl_id,
+
+flatten_cols AS (
+    SELECT
+        visit_adl_id,
         visit_adl_start_at,
         visit_adl_end_at,
         visit_adl_status,
         visit_adl_completed,
         visit_adl_completed_by,
         visit_adl_completion_context,
-        visit_adl_properties:not_completed_reason_name::VARCHAR AS not_completed_reason_name,
+        visit_adl_properties:not_completed_reason_name::VARCHAR
+            AS not_completed_reason_name,
         visit_adl_duration,
         visit_adl_is_ad_hoc,
         visit_adl_properties:schedule_item_id::VARCHAR AS schedule_item_id,
@@ -62,5 +65,6 @@ flatten_cols AS(
         _etl_is_deleted
     FROM raw_visit_daily_activity
 )
+
 SELECT *
 FROM flatten_cols

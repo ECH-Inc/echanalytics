@@ -1,9 +1,11 @@
-WITH raw_employee_group AS(
+WITH raw_employee_group AS (
     SELECT *
     FROM {{ source('alaya_care', 'employee_group') }}
 ),
-flatten_cols AS(
-    SELECT employee_id,
+
+flatten_cols AS (
+    SELECT
+        employee_id,
         group_id,
         description,
         active,
@@ -16,5 +18,6 @@ flatten_cols AS(
         lake_id
     FROM raw_employee_group
 )
+
 SELECT *
 FROM flatten_cols

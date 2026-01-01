@@ -1,9 +1,11 @@
-WITH raw_authorizations AS(
+WITH raw_authorizations AS (
     SELECT *
     FROM {{ source('alaya_care', 'authorizations') }}
 ),
-update_date_cols AS(
-    SELECT authorizations_id,
+
+update_date_cols AS (
+    SELECT
+        authorizations_id,
         authorization_number,
         start_at::DATE AS start_date,
         end_at::DATE AS end_date,
@@ -39,5 +41,6 @@ update_date_cols AS(
         rule_sunday
     FROM raw_authorizations
 )
+
 SELECT *
 FROM update_date_cols

@@ -1,22 +1,26 @@
-WITH service_fundings AS(
+WITH service_fundings AS (
     SELECT *
     FROM {{ ref('int_service_fundings') }}
 ),
-stg_service_code AS (
+
+service_code AS (
     SELECT *
     FROM {{ ref('stg_ac_service_code') }}
 ),
-dim_clients AS(
+
+dim_customer AS (
     SELECT *
-    FROM {{ ref('dim_cs_clients') }}
+    FROM {{ ref('dim_customer') }}
 ),
-client_service AS(
-    SELECT service_fundings.service_id,
+
+client_service AS (
+    SELECT
+        service_fundings.service_id,
         service_fundings.ac_client_id,
 
-        dim_clients.crm_id,
-        dim_clients.mac_id,
-        
+        dim_customer.crm_id,
+        dim_customer.mac_id,
+
         service_fundings.service_description,
         service_fundings.service_code_id,
         service_fundings.service_start_date,
@@ -28,14 +32,15 @@ client_service AS(
         service_fundings.funder_name,
         service_fundings.funder_program,
 
-        stg_service_code.department_id,
-        stg_service_code.department_name,
-        stg_service_code.duration
+        service_code.department_id,
+        service_code.department_name,
+        service_code.duration
     FROM service_fundings
-    LEFT JOIN stg_service_code
-        ON stg_service_code.service_code_id = service_fundings.service_code_id
-    LEFT JOIN dim_clients
-        ON dim_clients.ac_client_id = service_fundings.ac_client_id
+    LEFT JOIN service_code
+        ON service_fundings.service_code_id = service_code.service_code_id
+    LEFT JOIN dim_customer
+        ON service_fundings.ac_client_id = dim_customer.ac_client_id
 )
+
 SELECT *
 FROM client_service

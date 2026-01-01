@@ -1,17 +1,21 @@
-WITH raw_employee_term_note AS(
+WITH employee_termination_note AS (
     SELECT *
     FROM {{ source('alaya_care', 'employee_termination_note') }}
 ),
-flatten_cols AS(
-    SELECT id,
+
+flatten_cols AS (
+    SELECT
+        id,
         guid_to,
         properties:branch_id::INT AS branch_id,
-        properties:type::VARCHAR AS type,
-        properties:status::VARCHAR AS status,
+        properties:type::VARCHAR AS note_type,
+        properties:status::VARCHAR AS not_status,
         properties:content::VARCHAR AS content,
-        properties:is_client_coordinator_note::INT AS is_client_coordinator_note,
+        properties:is_client_coordinator_note::INT
+            AS is_client_coordinator_note,
         rn
-    FROM raw_employee_term_note
+    FROM employee_termination_note
 )
+
 SELECT *
 FROM flatten_cols
