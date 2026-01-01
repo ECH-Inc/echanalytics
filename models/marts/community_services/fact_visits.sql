@@ -1,9 +1,11 @@
-WITH stg_visit AS(
+WITH visits AS (
     SELECT *
     FROM {{ ref('stg_ac_visit') }}
 ),
-past_visit AS(
-    SELECT visit_id,
+
+past_visit AS (
+    SELECT
+        visit_id,
         guid,
         start_at,
         start_at::DATE AS start_date,
@@ -46,19 +48,23 @@ past_visit AS(
         in_out_of_recurrence_status,
         recurrence_frequency_type,
         visit_computed_rate_units
-    FROM stg_visit
-    WHERE start_at < current_date()
+    FROM visits
+    WHERE start_at < CURRENT_DATE()
 ),
-cs_clients AS(
+
+dim_customer AS (
     SELECT *
-    FROM {{ ref('dim_cs_clients') }}
+    FROM {{ ref('dim_customer') }}
 ),
-services AS(
+
+dim_service AS (
     SELECT *
-    FROM {{ ref('dim_services') }}
+    FROM {{ ref('dim_service') }}
 ),
-get_service_client_details AS(
-    SELECT past_visit.visit_id,
+
+get_service_client_details AS (
+    SELECT
+        past_visit.visit_id,
         past_visit.guid,
         past_visit.start_at,
         past_visit.start_date,
@@ -77,7 +83,7 @@ get_service_client_details AS(
         past_visit.employee_id,
         past_visit.ac_client_id,
 
-        cs_clients.crm_id,
+        dim_customer.crm_id,
 
         past_visit.service_instructions,
         past_visit.visit_unit_qty,
@@ -105,13 +111,14 @@ get_service_client_details AS(
         past_visit.recurrence_frequency_type,
         past_visit.visit_computed_rate_units,
 
-        services.department_id,
-        services.funder_program
+        dim_service.department_id,
+        dim_service.funder_program
     FROM past_visit
-    INNER JOIN cs_clients
-        ON cs_clients.ac_client_id = past_visit.ac_client_id
-    LEFT JOIN services
-        ON services.service_id = past_visit.service_id
+    INNER JOIN dim_customer
+        ON past_visit.ac_client_id = dim_customer.ac_client_id
+    LEFT JOIN dim_service
+        ON past_visit.service_id = dim_service.service_id
 )
+
 SELECT *
 FROM get_service_client_details

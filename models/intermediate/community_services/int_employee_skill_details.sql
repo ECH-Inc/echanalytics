@@ -1,13 +1,16 @@
-WITH stg_emp_skill AS(
+WITH stg_emp_skill AS (
     SELECT *
     FROM {{ ref('stg_ac_employee_skill') }}
 ),
-stg_skill AS(
+
+stg_skill AS (
     SELECT *
     FROM {{ ref('stg_ac_skill') }}
 ),
-emp_skill_details AS(
-    SELECT stg_emp_skill.employee_id,
+
+emp_skill_details AS (
+    SELECT
+        stg_emp_skill.employee_id,
         stg_emp_skill.client_id,
         stg_emp_skill.skill_id,
         stg_emp_skill.client_specific_skill,
@@ -25,7 +28,8 @@ emp_skill_details AS(
         stg_emp_skill.guid
     FROM stg_emp_skill
     LEFT JOIN stg_skill
-        ON stg_skill.skill_id = stg_emp_skill.skill_id
+        ON stg_emp_skill.skill_id = stg_skill.skill_id
 )
+
 SELECT *
 FROM emp_skill_details

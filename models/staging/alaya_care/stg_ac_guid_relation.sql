@@ -1,9 +1,11 @@
-WITH raw_guid_relation AS(
+WITH raw_guid_relation AS (
     SELECT *
     FROM {{ source('alaya_care', 'guid_relation') }}
 ),
-flatten_cols AS(
-    SELECT id,
+
+flatten_cols AS (
+    SELECT
+        id,
         guid_one,
         guid_two,
         idrelation,
@@ -11,5 +13,6 @@ flatten_cols AS(
         rating
     FROM raw_guid_relation
 )
+
 SELECT *
 FROM flatten_cols

@@ -1,0 +1,22 @@
+[sqlfluff]
+# Set the templater to dbt to parse Jinja in dbt models
+templater = dbt
+# Set the dialect to match data warehouse (e.g., snowflake, postgres)
+dialect = snowflake
+# Optional: Set the indentation style
+indent_unit = tab
+
+[sqlfluff:indentation]
+tab_space_size = 4
+
+[sqlfluff:rules:capitalisation.keywords]
+# Enforces SELECT, FROM, WHERE to be UPPER
+capitalisation_policy = upper
+
+[sqlfluff:rules:capitalisation.functions]
+# Enforces CURRENT_DATE(), UPPER(), etc. to be UPPER
+extended_capitalisation_policy = upper
+
+[sqlfluff:rules:capitalisation.identifiers]
+extended_capitalisation_policy = snake
+unquoted_identifiers_policy = all

@@ -1,9 +1,11 @@
-WITH raw_auth_usages AS(
+WITH raw_auth_usages AS (
     SELECT *
     FROM {{ source('alaya_care', 'authorization_usages') }}
 ),
-update_date_cols AS(
-    SELECT au_id,
+
+update_date_cols AS (
+    SELECT
+        au_id,
         authorization_id,
         authorization_usage_id,
         authorized_hours,
@@ -25,5 +27,6 @@ update_date_cols AS(
         rule_type
     FROM raw_auth_usages
 )
+
 SELECT *
 FROM update_date_cols

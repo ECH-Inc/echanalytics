@@ -1,18 +1,5 @@
 models:
-  - name: dim_cs_clients
-    description: Client basic demographic profile data from Alaya Care
-    columns:
-      - name: ac_client_id
-        description: Unique identifier for each customer in Alaya Care
-        tests:
-          - unique
-          - not_null
-      - name: mac_id
-        description: Unique identifier for each customer in My Aged Care (MAC) portal
-      - name: crm_id
-        description: Unique identifier for each customer from ECH CRM system
-  
-  - name: dim_services
+  - name: dim_service
     description: All services that clients have in Alaya Care
     columns:
       - name: service_id
@@ -45,7 +32,7 @@ models:
       - name: funder_program
         description: The funder program that a service belongs to (e.g. CHSP, HCP, SAH, etc...)
   
-  - name: fact_client_visits
+  - name: fact_visits
     description: Client visits in the past. Only include visit with start date less than current date
     columns:
       - name: visit_id
@@ -71,7 +58,7 @@ models:
       - name: ac_client_id
         tests:
           - relationships:
-              to: ref('dim_cs_clients')
+              to: ref('dim_customer')
               field: ac_client_id
       - name: service_instructions
       - name: visit_unit_qty

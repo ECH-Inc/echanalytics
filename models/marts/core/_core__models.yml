@@ -1,0 +1,15 @@
+models:
+  - name: dim_customer
+    description: Customer entity with basic demographic profile data from Alaya Care
+    columns:
+      - name: ac_client_id
+        description: Unique identifier for each customer in Alaya Care
+        tests:
+          - unique
+          - not_null
+      - name: mac_id
+        description: Unique identifier for each customer in My Aged Care (MAC) portal
+      - name: crm_id
+        description: Unique identifier for each customer from ECH CRM system
+  - name: dim_employee
+    description: Employee entity with employee profile from Alaya Care

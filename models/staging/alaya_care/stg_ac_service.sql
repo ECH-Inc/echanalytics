@@ -1,11 +1,14 @@
 WITH raw_service AS (
     SELECT *
     FROM {{ source('alaya_care', 'service') }}
-    WHERE service_status_reason <> 'Entered in Error'
+    WHERE
+        service_status_reason <> 'Entered in Error'
         AND _etl_is_deleted = FALSE
 ),
-flatten_cols AS(
-    SELECT service_id,
+
+flatten_cols AS (
+    SELECT
+        service_id,
         guid,
         branch_id,
         service_episode_id,
@@ -49,5 +52,6 @@ flatten_cols AS(
         _etl_is_deleted
     FROM raw_service
 )
+
 SELECT *
 FROM flatten_cols

@@ -2,8 +2,10 @@ WITH raw_funder AS (
     SELECT *
     FROM {{ source('alaya_care', 'funder') }}
 ),
-flatten_funder AS(
-    SELECT funder_id,
+
+flatten_funder AS (
+    SELECT
+        funder_id,
         profile_id,
         guid,
         code,
@@ -29,5 +31,6 @@ flatten_funder AS(
         updated_by
     FROM raw_funder
 )
+
 SELECT *
 FROM flatten_funder

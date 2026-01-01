@@ -3,8 +3,10 @@ WITH raw_service_funder AS (
     FROM {{ source('alaya_care', 'service_funder') }}
     WHERE _etl_is_deleted = FALSE
 ),
+
 flatten_cols AS (
-    SELECT service_id,
+    SELECT
+        service_id,
         service_guid,
         service_funder_id,
         gfb_id,
@@ -18,5 +20,6 @@ flatten_cols AS (
         _etl_updated_at_utc
     FROM raw_service_funder
 )
+
 SELECT *
 FROM flatten_cols

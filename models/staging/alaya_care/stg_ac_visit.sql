@@ -1,10 +1,12 @@
-WITH raw_visit AS(
+WITH raw_visit AS (
     SELECT *
     FROM {{ source('alaya_care', 'visit') }}
     WHERE _etl_is_deleted = FALSE
 ),
-keep_required_columns AS(
-    SELECT visit_id,
+
+keep_required_columns AS (
+    SELECT
+        visit_id,
         guid,
         start_at,
         start_at_utc,
@@ -73,5 +75,6 @@ keep_required_columns AS(
         __join_fields_hash
     FROM raw_visit
 )
+
 SELECT *
 FROM keep_required_columns
