@@ -85,7 +85,7 @@ get_client_ac_details AS (
     SELECT
         service_group.ac_client_id,
 
-        dim_customer.crm_id,
+        dim_customer.external_id,
         dim_customer.mac_id,
 
         service_group.funder_program,
@@ -105,7 +105,7 @@ gen_group_sk AS (
                                                 'group_start_date',
                                                 'group_end_date']) }} AS service_group_sk,
         ac_client_id,
-        crm_id,
+        external_id,
         mac_id,
         funder_program,
         group_start_date,

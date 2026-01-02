@@ -83,7 +83,7 @@ get_service_client_details AS (
         past_visit.employee_id,
         past_visit.ac_client_id,
 
-        dim_customer.crm_id,
+        dim_customer.external_id,
 
         past_visit.service_instructions,
         past_visit.visit_unit_qty,

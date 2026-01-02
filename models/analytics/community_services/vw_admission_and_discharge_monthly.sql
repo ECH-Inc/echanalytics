@@ -24,7 +24,7 @@ next_start AS (
     SELECT
         service_group_sk,
         ac_client_id,
-        crm_id,
+        external_id,
         mac_id,
         funder_program,
         group_start_date,
@@ -40,7 +40,7 @@ cal_gaps AS (
     SELECT
         service_group_sk,
         ac_client_id,
-        crm_id,
+        external_id,
         mac_id,
         funder_program,
         group_start_date,

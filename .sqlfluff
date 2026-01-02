@@ -4,7 +4,9 @@ templater = dbt
 # Set the dialect to match data warehouse (e.g., snowflake, postgres)
 dialect = snowflake
 # Optional: Set the indentation style
-indent_unit = tab
+indent_unit = space
+# Increase the limit to 100 characters
+max_line_length = 100
 
 [sqlfluff:indentation]
 tab_space_size = 4

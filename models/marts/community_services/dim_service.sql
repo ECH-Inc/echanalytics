@@ -18,7 +18,7 @@ client_service AS (
         service_fundings.service_id,
         service_fundings.ac_client_id,
 
-        dim_customer.crm_id,
+        dim_customer.external_id,
         dim_customer.mac_id,
 
         service_fundings.service_description,
