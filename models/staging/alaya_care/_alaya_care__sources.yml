@@ -7,7 +7,7 @@ sources:
   tables:
     - name: client
       identifier: SHARED_CLIENT_INCREMENTAL
-    - name: client_tag
+    - name: client_tags
       identifier: SHARED_CLIENT_TAGS
     - name: client_care_plan
       identifier: SHARED_CLIENT_CARE_PLAN
