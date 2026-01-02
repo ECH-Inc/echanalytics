@@ -24,7 +24,14 @@ client_details AS (
         client.middle_name,
         client.last_name,
         client.preferred_name,
+        CASE
+            WHEN
+                client.preferred_name IS NULL
+                THEN CONCAT_WS(' ', client.first_name, client.last_name)
+            ELSE client.first_name || ' (' || client.preferred_name || ') ' || client.last_name
+        END AS full_name,
         client.birth_date,
+        FLOOR(DATEDIFF(DAY, client.birth_date, CURRENT_DATE()) / 365.25) AS age,
         client.is_birth_date_an_estimate,
         client.gender,
         client.marital_status,
@@ -32,6 +39,7 @@ client_details AS (
         client.religion,
         client.country_of_birth,
         client.language_spoken_at_home_code,
+        client.preferred_language,
         client.email_comments,
         client.email,
         client.phone_comments,

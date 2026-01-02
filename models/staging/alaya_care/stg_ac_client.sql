@@ -12,21 +12,35 @@ flatten_cols AS (
         branch_id,
         profile:comcare_id::VARCHAR AS comcare_id,
         profile:uid::VARCHAR AS external_id,
-        profile:salutation::VARCHAR AS salutation,
-        profile:first_name::VARCHAR AS first_name, -- noqa: RF04
-        profile:middlename::VARCHAR AS middle_name, -- noqa: RF04
-        profile:last_name::VARCHAR AS last_name, -- noqa: RF04
-        profile:preferred_name::VARCHAR AS preferred_name,
+        'AC' || LPAD(guid, 9, '0') AS alayacare_id,
+        NULLIF(profile:mac_id::VARCHAR, '') AS mac_id,
+        NULLIF(profile:hcp_recipient_id::VARCHAR, '')
+            AS hcp_recipient_id,
+        NULLIF(profile:import_id::VARCHAR, '') AS import_id,
+        NULLIF(profile:d365_debtor_id::VARCHAR, '') AS d_365_debtor_id,
+        NULLIF(profile:salutation::VARCHAR, '') AS salutation,
+        NULLIF(profile:first_name::VARCHAR, '') AS first_name,
+        NULLIF(profile:middlename::VARCHAR, '') AS middle_name,
+        NULLIF(profile:last_name::VARCHAR, '') AS last_name,
+        NULLIF(profile:preferred_name::VARCHAR, '') AS preferred_name,
         birthday AS birth_date,
+        COALESCE(profile:is_birth_date_an_estimate::BOOLEAN, FALSE)
+            AS is_birth_date_an_estimate,
+        COALESCE(NULLIF(profile:gender_code::VARCHAR, ''), 'Not Stated')
+            AS gender,
+        INITCAP(properties_tbl_gt_account:idstatus::VARCHAR)
+            AS client_status,
+        COALESCE(profile:interpreter_required::BOOLEAN, FALSE)
+            AS interpreter_required,
         profile:marital_status::VARCHAR AS marital_status,
         profile:religion::VARCHAR AS religion,
         profile:country_of_birth_code::VARCHAR AS country_of_birth,
         preferred_language,
         profile:language_spoken_at_home_code::VARCHAR
             AS language_spoken_at_home_code,
-        profile:client_email_comments::VARCHAR AS email_comments,
+        profile:client_email_comments::VARCHAR AS email_comments, -- noqa: RF04
         profile:email::VARCHAR AS email, -- noqa: RF04
-        profile:client_phone_comments::VARCHAR AS phone_comments,
+        profile:client_phone_comments::VARCHAR AS phone_comments, -- noqa: RF04
         profile:phone_main::VARCHAR AS phone_main,
         profile:phone_personal::VARCHAR AS phone_personal,
         profile:phone_other::VARCHAR AS phone_other,
@@ -35,7 +49,7 @@ flatten_cols AS (
         profile:address_suite::VARCHAR AS address_suite,
         profile:address::VARCHAR AS address,
         profile:city::VARCHAR AS city,
-        profile:state::VARCHAR AS state,
+        profile:state::VARCHAR AS state, -- noqa: RF04
         profile:zip::VARCHAR AS postcode,
         profile:country::VARCHAR AS country,
         profile:postal_address_line_1::VARCHAR AS postal_address_line_1,
@@ -88,34 +102,6 @@ flatten_cols AS (
         profile:accommodation_type_code::VARCHAR AS accommodation_type,
         profile:is_a_carer::VARCHAR AS is_a_carer,
         profile:education_level_code::VARCHAR AS education_level,
-        profile:tags_v2::VARCHAR AS tags_v_2,
-        profile:has_carer::VARCHAR AS has_carer,
-        profile:carer_residency::VARCHAR AS carer_residency,
-        profile:remarks::VARCHAR AS remarks,
-        profile:client_is_tpi::VARCHAR AS client_is_tpi,
-        admission_date::DATE AS admission_date,
-        discharge_date::DATE AS discharged_date,
-        client_brn,
-        visit_count,
-        has_adls,
-        created_at,
-        created_by,
-        updated_at,
-        updated_by,
-        'AC' || LPAD(guid, 9, '0') AS alayacare_id,
-        NULLIF(profile:mac_id::VARCHAR, '') AS mac_id,
-        NULLIF(profile:hcp_recipient_id::VARCHAR, '')
-            AS hcp_recipient_id,
-        NULLIF(profile:import_id::VARCHAR, '') AS import_id,
-        NULLIF(profile:d365_debtor_id::VARCHAR, '') AS d_365_debtor_id,
-        COALESCE(profile:is_birth_date_an_estimate::BOOLEAN, FALSE)
-            AS is_birth_date_an_estimate,
-        COALESCE(NULLIF(profile:gender_code::VARCHAR, ''), 'Not Stated')
-            AS gender,
-        INITCAP(properties_tbl_gt_account:idstatus::VARCHAR)
-            AS client_status,
-        COALESCE(profile:interpreter_required::BOOLEAN, FALSE)
-            AS interpreter_required,
         COALESCE(profile:ech_retirement_living_resident::BOOLEAN, FALSE)
             AS ech_retirement_living_resident,
         NULLIF(profile:ambulance_card_number::VARCHAR, '')
@@ -153,7 +139,21 @@ flatten_cols AS (
             profile:hcp_client_transfer_from_another_provider::VARCHAR,
             ''
         )
-            AS hcp_client_transfer_from_another_provider
+            AS hcp_client_transfer_from_another_provider,
+        profile:tags_v2::VARCHAR AS tags_v_2,
+        profile:has_carer::VARCHAR AS has_carer,
+        profile:carer_residency::VARCHAR AS carer_residency,
+        profile:remarks::VARCHAR AS remarks,
+        profile:client_is_tpi::VARCHAR AS client_is_tpi,
+        admission_date::DATE AS admission_date,
+        discharge_date::DATE AS discharged_date,
+        client_brn,
+        visit_count,
+        has_adls,
+        created_at,
+        created_by,
+        updated_at,
+        updated_by
     FROM client
 )
 
